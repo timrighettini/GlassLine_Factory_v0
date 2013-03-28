@@ -8,6 +8,8 @@ import shared.interfaces.ConveyorFamily;
 import transducer.TChannel;
 import transducer.TEvent;
 import engine.agent.Agent;
+import factory_v0_Tim.agents.PopUpAgent.processState;
+import factory_v0_Tim.misc.ConveyorFamilyImp;
 
 public class RobotAgent extends Agent {
 
@@ -36,7 +38,7 @@ public class RobotAgent extends Agent {
 
 	List<MyGlass> glassToBeProcessed; // This name will be abbreviated as glassToBeProcessed in many functions to save on space and complexity
 	List<MachineCom> machineComs; 
-	ConveyorFamily cf;
+	ConveyorFamilyImp cf;
 
 	//Messages:
 	public void msgProcessGlass(Glass g) { // Get Glass from popUp to robot
@@ -46,21 +48,34 @@ public class RobotAgent extends Agent {
 
 	public void msgDoneProcessingGlass(Glass g) {
 		glassToBeProcessed.add(new MyGlass(g, processState.doneProcessing));
-		if ($ com in machineComs s.t. com.glassBeingProcessed.glass.id == g.id) then
-			com.inUse = false;
-			com.glassBeingProcessed = null;
-		else // There is a bug – this should never happen
-		stateChanged();
+		for (MachineCom com: machineComs) {
+			if (com.glassBeingProcessed.glass.getId() == g.getId()) {
+				com.inUse = false;
+				com.glassBeingProcessed = null;
+				stateChanged();
+				return;
+			}
+		}
+		System.out.println("Hey, this is a bug, I should not be here");
 	}
 
 	//Scheduler:
 	public boolean pickAndExecuteAnAction() {
-		if ($ g in glassToBeProcessed s.t. g.processState == processState.unprocessed) then
-			if ($ com in machineComs s.t. com.inUse == false) then
-				actPassGlassToMachine (g, com); return true;
-		if ($ g in glassToBeProcessed s.t. g.processState == processState.doneProcessing) then
-			actPassGlassToCF (g); return true;
-	
+		for (MyGlass g: glassToBeProcessed) {
+			if (g.processState == processState.unprocessed) {
+				for (MachineCom com: machineComs) {
+					if (com.inUse == false) {
+						actPassGlassToMachine(g, com); return true;
+					}
+				}
+			}
+		}
+		
+		for (MyGlass g: glassToBeProcessed) {
+			if (g.processState == processState.doneProcessing) {
+				actPassGlassToCF(g); return true;
+			}
+		}	
 		return false;
 	}
 
@@ -73,7 +88,7 @@ public class RobotAgent extends Agent {
 	}
 
 	private void actPassGlassToCF(MyGlass g) {
-		cf.conveyor.msgDoneProcessingGlass(g.glass);
+		cf.msgDoneProcessingGlass(g.glass, 0);
 		glassToBeProcessed.remove(g);
 	}
 

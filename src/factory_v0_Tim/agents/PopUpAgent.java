@@ -3,12 +3,14 @@ package factory_v0_Tim.agents;
 import java.util.*;
 
 import engine.agent.Agent;
+import factory_v0_Tim.misc.ConveyorFamilyImp;
 import shared.Glass;
 import shared.enums.MachineType;
+import shared.interfaces.PopUp;
 import transducer.TChannel;
 import transducer.TEvent;
 
-public class PopUpAgent extends Agent {
+public class PopUpAgent extends Agent implements PopUp {
 
 	// Name: PopUpAgent
 
@@ -41,6 +43,8 @@ public class PopUpAgent extends Agent {
 
 	// Positional variable for whether the Pop-Up in the GUI is up or down, and it will be changed through the transducer and checked within one of the scheduler rules
 	boolean popUpDown; // Is this value is true, then the associated popUp is down (will be changed through the appropriate transducer eventFired(args[]) function.
+	
+	ConveyorFamilyImp cf;
 
 	//Messages:
 	public void msgGiveGlassToPopUp(Glass g) { // Get Glass from conveyor to PopUp
@@ -50,39 +54,53 @@ public class PopUpAgent extends Agent {
 
 	public void msgDoneProcessingGlass(Glass g) {
 		glassToBeProcessed.add(new MyGlass(g, processState.doneProcessing));
-		if ($ com in robotComs s.t. com.glassBeingProcessed.glass.id == g.id) then
-			com.inUse = false;
-			com.glassBeingProcessed = null;
-		else // There is a bug – this should never happen
-			stateChanged();
+		for (RobotCom com: robotComs) {
+			if (com.glassBeingProcessed.glass.getId() == g.getId()) {
+				com.inUse = false;
+				com.glassBeingProcessed = null;
+				stateChanged();
+				return;
+			}
+		}
+		System.out.println("Hey, this is a bug, I should not be here");
 	}
 
 	//Scheduler:
 	public boolean pickAndExecuteAnAction() {
-		if ($ g in glassToBeProcessed s.t. g.processState == processState.unprocessed) then
-			if ($ com in robotComs s.t. com.inUse == false && popUpDown == true) then
-		actPassGlassToRobot(g, com); return true;
-		if ($ g in glassToBeProcessed s.t. g.processState == processState.doneProcessing) then
-			actPassGlassToConveyor(g); return true;
-	
+		for (MyGlass g: glassToBeProcessed) {
+			if (g.processState == processState.unprocessed) {
+				for (RobotCom com: robotComs) {
+					if (com.inUse == false && popUpDown == true) {
+						actPassGlassToRobot(g, com); return true;
+					}
+				}
+			}
+		}
+		for (MyGlass g: glassToBeProcessed) {
+			if (g.processState == processState.doneProcessing) {
+				actPassGlassToConveyor(g); return true;
+			}
+		}
 		return false;
 	}
 
 	//Actions:
 	private void actPassGlassToRobot(MyGlass g, RobotCom com) {
-		if (g.glass.recipe.contains(com.processType) then
+		if (g.glass.getRecipe().containsKey(com.processType)) {
 			com.robot.msgProcessGlass(g.glass);
 			com. glassBeingProcessed = g;
 			com.inUse = true;
 			glassToBeProcessed.remove(g);	
-		else 
-			g.processState == processState.doneProcessing;
+		}
+		else {
+			g.processState = processState.doneProcessing;
 			actPassGlassToConveyor(g);
 			// Remove statement isn’t needed – it is done within the actPassGlassToConveyor
+		}
 	}
 
 	private void actPassGlassToConveyor(MyGlass g) {
-		cf.conveyor.msgUpdateGlass(g.glass);
+		cf.getConveyor().msgUpdateGlass(g.glass);
 		glassToBeProcessed.remove(g);
 	}
 
@@ -91,5 +109,19 @@ public class PopUpAgent extends Agent {
 	public void eventFired(TChannel channel, TEvent event, Object[] args) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public int getFreeChannels() {
+		int freeChannels = 0;
+		for (RobotCom com: robotComs) {
+			if (com.inUse == false)
+				freeChannels++;
+		}
+		
+		// Make sure to augment the free channels number by the amount of glasses that are currently within the popUp, so that two glasses do not come up when there shoulkd only be one
+		
+		freeChannels -= glassToBeProcessed.size();
+		
+		return freeChannels;
 	}
 }

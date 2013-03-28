@@ -1,13 +1,18 @@
 package factory_v0_Tim.agents;
 
 import java.util.*;
+
+import javax.swing.Popup;
+
 import shared.Glass;
+import shared.interfaces.Conveyor;
 import shared.interfaces.ConveyorFamily;
 import transducer.TChannel;
 import transducer.TEvent;
 import engine.agent.Agent;
+import factory_v0_Tim.misc.ConveyorFamilyImp;
 
-public class ConveyorAgent extends Agent {
+public class ConveyorAgent extends Agent implements Conveyor {
 	//Name: ConveyorAgent
 
 	//Description:  Will hold the glass until it needs to go into the next conveyor for a different set of processes, or to leave the factory entirely.
@@ -25,23 +30,31 @@ public class ConveyorAgent extends Agent {
 	}
 	List<MyGlass> glassSheets; // List to hold all of the glass sheets
 	boolean positionFreeNextCF; // Will determine if a piece of glass should be passed to the next conveyor family.  This will initially be set to true.
-	ConveyorFamily cf;
+	ConveyorFamilyImp cf;
 
 	//Messages:
 	public void msgGiveGlassToConveyor(Glass g) {
-		glassSheets.add(new MyGlass(g)); // conveyorState will always initializes to onConveyor
+		glassSheets.add(new MyGlass(g, conveyorState.onConveyor)); // conveyorState will always initializes to onConveyor
 		stateChanged();
 	}
+	
 	public void msgGiveGlassToPopUp(Glass g) {
-		if ($ glass in glassSheets s.t. glass.glass.id == g.id) then
-			glass.conveyorState = conveyorState.passPopUp;
-			stateChanged();
+		for (MyGlass glass: glassSheets) {
+			if (glass.glass.getId() == g.getId()) {
+				glass.conveyorState = conveyorState.passPopUp;
+				stateChanged();
+				break;
+			}
+		}
 	}
 
 	public void msgPassOffGlass(Glass g) {
-		if ($ glass in glassSheets s.t. glass.glass.id == g.id) then
-			glass.conveyorState = conveyorState.passCF;
-			stateChanged();
+		for (MyGlass glass: glassSheets) {
+			if (glass.glass.getId() == g.getId()) {
+				glass.conveyorState = conveyorState.passCF;
+				stateChanged();
+			}
+		}
 	}
 
 	public void msgPositionFree() {
@@ -56,29 +69,33 @@ public class ConveyorAgent extends Agent {
 
 	//Scheduler:
 	public boolean pickAndExecuteAnAction() {
-		if ($ g in glassSheets s.t. g.conveyorState == conveyorState.popUp && cf.popUp.gTBP.empty() == true && $ com in cf.popUp.robotComs s.t. com.inUse == false) then
-			// This rule will only work when the glassSheet is supposed to go to the PopUp, when there is nothing on the pop-up, and when there is a available robot to process the glass
-			actPassGlassToPopUp(g); return true;
-		if ($ g in glassSheets s.t. g.conveyorState == conveyorState.passCF && positionFreeCF == true) then
-			actPassGlassToNextCF(g); return true;
+		for (MyGlass g: glassSheets) {
+			if (g.conveyorState == conveyorState.passPopUp && cf.getPopUp().glassToBeProcessed.isEmpty() == true) {
+				if (cf.getPopUp().getFreeChannels() > 0) {						
+					// This rule will only work when the glassSheet is supposed to go to the PopUp, when there is nothing on the pop-up, and when there is a available robot to process the glass
+					actPassGlassToPopUp(g); return true;
+				}	
+			}
+				
+		}
+		for (MyGlass g: glassSheets) {
+			if (g.conveyorState == conveyorState.passCF && positionFreeNextCF == true) {
+				actPassGlassToNextCF(g); return true;
+			}
+		}
+		return false;
 	}
 	
 	//Actions:
 	private void actPassGlassToPopUp(MyGlass g) {
-		cf.popUp.msgGiveGlassToPopUp(g.glass);
+		cf.getPopUp().msgGiveGlassToPopUp(g.glass);
 		glassSheets.remove(g);
 	}
 
 	private void actPassGlassToNextCF(MyGlass g) {
-		cf.nextCF.msgHereIsGlass(g.glass);
+		cf.getNextCF().msgHereIsGlass(g.glass);
 		glassSheets.remove(g);
 		positionFreeNextCF = false;
-	}
-
-	@Override
-	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	//Other Methods:

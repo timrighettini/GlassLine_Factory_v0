@@ -58,7 +58,7 @@ public class Glass {
 	}
 
 	public int getID() {
-		return id;
+		return getId();
 	}
 
 	public static int getCurrentID() {
@@ -92,5 +92,19 @@ public class Glass {
 
 			System.out.println();
 		}
+	}
+
+	// Getters and setters
+	
+	public int getId() {
+		return id;
+	}
+
+	public Map<MachineType, Boolean> getRecipe() {
+		return recipe;
+	}
+
+	public void setRecipe(Map<MachineType, Boolean> recipe) {
+		this.recipe = recipe;
 	}
 }

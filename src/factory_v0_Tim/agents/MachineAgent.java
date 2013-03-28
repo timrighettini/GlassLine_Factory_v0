@@ -38,28 +38,38 @@ public class MachineAgent extends Agent {
 
 	// Transducer specific message
 	public void msgDoneProcessingGlass(Glass g) {
-		if ($ glass in glassToBeProcessed s.t. glass.glass.id == g.id) then
-			g.processState = processState.doneProcessing;
+		for (MyGlass glass: glassToBeProcessed) {
+			if (glass.glass.getId() == g.getId()) {
+				glass.processState = processState.doneProcessing;
+			}
+		}
 	}
 
 	//Scheduler:
 	public boolean pickAndExecuteAnAction() {	
-		if ($ g in glassToBeProcessed s.t. g.processState == processState.unProcessed) then
-			actProcessGlass(g); return true;
-		if ($ g in glassToBeProcessed s.t. g.processState == processState.doneProcessing) then
-			actPassGlassToRobot(g); return true;
+		for (MyGlass g: glassToBeProcessed) {
+			if (g.processState == processState.unprocessed) {
+				actProcessGlass(g); return true;
+			}
+		}
+		
+		for (MyGlass g: glassToBeProcessed) {
+			if (g.processState == processState.doneProcessing) {
+				actPassGlassToRobot(g); return true;
+			}
+		}
 	
 		return false;
 	}
 
 	//Actions:
 	private void actProcessGlass(MyGlass g) {
-		transducer.sendProcessGlassMessage(); // Stub for when the transducer is set up to send a processing message to the animation
+		//transducer.sendProcessGlassMessage(); // Stub for when the transducer is set up to send a processing message to the animation
 		g.processState = processState.processing;
 	}
 
 	private void actPassGlassToRobot(MyGlass g) {
-		g.glass.recipe.remove(this.processType); // Done with process, does not need to be in recipe anymore
+		g.glass.getRecipe().remove(this.processType); // Done with process, does not need to be in recipe anymore
 		robot.msgDoneProcessingGlass(g.glass);
 		glassToBeProcessed.remove(g);
 	}
