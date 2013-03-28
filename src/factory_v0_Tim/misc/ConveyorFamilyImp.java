@@ -6,7 +6,7 @@ import factory_v0_Tim.agents.*;
 import shared.Glass;
 import shared.interfaces.*;
 
-public class ConveyorFamilyImp {
+public class ConveyorFamilyImp implements ConveyorFamily {
 	//Name: ConveyorFamilyImp
 
 	//Description:  Will act as a wrapper class for a set of conveyors, sensors, and pop-ups.  It will also contain a reference to robots and machines through its components
@@ -19,7 +19,7 @@ public class ConveyorFamilyImp {
 	private PopUpAgent popUp;
 	private String name;
 	
-	//Constructor(s):
+	//Constructors:
 	public ConveyorFamilyImp(String name, ConveyorFamilyImp prevCF, ConveyorFamilyImp nextCF, Conveyor conveyor, List<Sensor> sensors, PopUp popUp) {
 		this.name = name;
 		this.prevCF = prevCF;
@@ -49,6 +49,8 @@ public class ConveyorFamilyImp {
 		getPopUp().msgDoneProcessingGlass(g);
 		System.out.println(name + ": Messaged pop up with processed glass.");
 	}
+	
+	//Other Methods:
 
 	public Conveyor getConveyor() {
 		return conveyor;
@@ -84,5 +86,11 @@ public class ConveyorFamilyImp {
 
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public void msgGlassDone(Glass glass, int machineIndex) {
+		// TODO Auto-generated method stub
+		
 	}
 }

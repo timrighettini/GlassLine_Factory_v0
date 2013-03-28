@@ -31,10 +31,22 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	List<MyGlass> glassSheets; // List to hold all of the glass sheets
 	boolean positionFreeNextCF; // Will determine if a piece of glass should be passed to the next conveyor family.  This will initially be set to true.
 	ConveyorFamilyImp cf;
+	
+	// Constructors:
+	public ConveyorAgent(String name, ConveyorFamily cf) {
+		// Set the passed in values first
+		this.name = name;
+		this.cf = (ConveyorFamilyImp) cf;		
+		
+		// Then set the values that need to be initialized within this class, specifically
+		glassSheets = Collections.synchronizedList(new ArrayList<MyGlass>());
+		positionFreeNextCF = true; // Obviously, there will be nothing in the next conveyor set when the system initializes, so I can make the assumption that nothing is there too
+	}
 
 	//Messages:
 	public void msgGiveGlassToConveyor(Glass g) {
 		glassSheets.add(new MyGlass(g, conveyorState.onConveyor)); // conveyorState will always initializes to onConveyor
+		print("Glass with ID (" + g.getId() + ") added to conveyor");
 		stateChanged();
 	}
 	
@@ -42,6 +54,7 @@ public class ConveyorAgent extends Agent implements Conveyor {
 		for (MyGlass glass: glassSheets) {
 			if (glass.glass.getId() == g.getId()) {
 				glass.conveyorState = conveyorState.passPopUp;
+				print("Glass with ID (" + glass.glass.getId() + ") soon going to PopUp");
 				stateChanged();
 				break;
 			}
@@ -52,6 +65,7 @@ public class ConveyorAgent extends Agent implements Conveyor {
 		for (MyGlass glass: glassSheets) {
 			if (glass.glass.getId() == g.getId()) {
 				glass.conveyorState = conveyorState.passCF;
+				print("Glass with ID (" + glass.glass.getId() + ") soon going to next ConveyorFamily");
 				stateChanged();
 			}
 		}
@@ -59,6 +73,7 @@ public class ConveyorAgent extends Agent implements Conveyor {
 
 	public void msgPositionFree() {
 		positionFreeNextCF = true;
+		print("Next conveoyr is available for a piece of glass.");
 		stateChanged();
 	}
 
@@ -89,11 +104,13 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	//Actions:
 	private void actPassGlassToPopUp(MyGlass g) {
 		cf.getPopUp().msgGiveGlassToPopUp(g.glass);
+		print("Glass with ID (" + g.glass.getId() + ") passed to PopUp");
 		glassSheets.remove(g);
 	}
 
 	private void actPassGlassToNextCF(MyGlass g) {
 		cf.getNextCF().msgHereIsGlass(g.glass);
+		print("Glass with ID (" + g.glass.getId() + ") passed to nextCF");
 		glassSheets.remove(g);
 		positionFreeNextCF = false;
 	}

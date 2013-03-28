@@ -50,6 +50,7 @@ public class SensorAgent extends Agent implements Sensor {
 	//Messages:
 	public void msgHereIsGlass(Glass glass) {
 		glassSheets.add(new MyGlass(glass, location.entry, onSensor.justEntered));
+		print("Glass with ID (" + glass.getId() + ") just entered sensor " + name);
 		stateChanged();
 	}
 
@@ -59,7 +60,8 @@ public class SensorAgent extends Agent implements Sensor {
 		for (MyGlass g: glassSheets) {
 			if (g.glass.getId() == glass.getId()) {
 				g.onSensor = onSensor.no;
-				stateChanged();		
+				stateChanged();	
+				print("Transducer call: glass with ID (" + g.glass.getId() + ") is off of the sensor " + name);
 			}
 		}
 	}
@@ -68,11 +70,14 @@ public class SensorAgent extends Agent implements Sensor {
 		location l = location.entry;
 		if (strLocation.equals("popUp")) {
 			l = location.popup;
+			glassSheets.add(new MyGlass(glass, l, onSensor.justEntered));
+			print("Transducer call: glass with ID (" + glass.getId() + ") is on the sensor " + name);
 		}
 		else if (strLocation.equals("exit")) {
 			l = location.exit;
+			glassSheets.add(new MyGlass(glass, l, onSensor.justEntered));
+			print("Transducer call: glass with ID (" + glass.getId() + ") is on the sensor " + name);
 		}
-		glassSheets.add(new MyGlass(glass, l, onSensor.justEntered));
 		stateChanged();
 	}
 	
@@ -93,18 +98,25 @@ public class SensorAgent extends Agent implements Sensor {
 
 	//Actions:
 	private void actPassGlassToConveyor(MyGlass g) {
-		if (g.location == location.entry) 
+		if (g.location == location.entry) {
 			cf.getConveyor().msgGiveGlassToConveyor(g.glass);
-		else if (g.location == location.popup) 
-			cf.getConveyor().msgGiveGlassToPopUp(g.glass);	
-		else if (g.location == location.exit) 
-			cf.getConveyor().msgPassOffGlass(g.glass);	
+			print("Glass with ID (" + g.glass.getId() + ") passed to conveyor (for entry)");
+		}
+		else if (g.location == location.popup) { 
+			cf.getConveyor().msgGiveGlassToPopUp(g.glass);
+			print("Glass with ID (" + g.glass.getId() + ") passed to conveyor (for popUp)");
+		}
+		else if (g.location == location.exit) { 
+			cf.getConveyor().msgPassOffGlass(g.glass);
+			print("Glass with ID (" + g.glass.getId() + ") passed to conveyor (for exit)");
+		}
 	}
 
 	private void actRemoveGlass(MyGlass g) {
 		glassSheets.remove(g);
 		if (g.location == location.entry && cf.getPrevCF() != null) { // Tell the previous conveyor family that the sensor currently has nothing on it
 			cf.getPrevCF().msgPositionFree();
+			print("Glass with ID (" + g.glass.getId() + ") removed from sensor " + name);
 		}
 	}
 
