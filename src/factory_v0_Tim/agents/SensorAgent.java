@@ -3,6 +3,7 @@ package factory_v0_Tim.agents;
 import java.util.*;
 
 import shared.Glass;
+import shared.interfaces.ConveyorFamily;
 import shared.interfaces.Sensor;
 import transducer.TChannel;
 import transducer.TEvent;
@@ -13,7 +14,7 @@ public class SensorAgent extends Agent implements Sensor {
 
 	//Name: SensorAgent
 
-	//Description:  Will detect if a piece of glass has entered, exited, or on a popup for any given set of conveyors.  Even though all of the sensor functionality currently melded into one agent, I may split this agent up into a base agent and three inheritance agents – EntrySensorAgent, ExitSensorAgent, and PopUpSensorAgent – during implementation
+	//Description: Will detect if a piece of glass has entered, exited, or on a popup for any given set of conveyors.  Even though all of the sensor functionality currently melded into one agent, I may split this agent up into a base agent and three inheritance agents – EntrySensorAgent, ExitSensorAgent, and PopUpSensorAgent – during implementation
 
 	//Data:	
 	public enum onSensor {justEntered, yes, no}; // Is the glass on an given sensor?
@@ -34,6 +35,17 @@ public class SensorAgent extends Agent implements Sensor {
 	List<String> type; // Will hold the type of sensor this is, and it may be of more than one type
 	List<MyGlass> glassSheets; // Will hold all glass references
 	ConveyorFamilyImp cf; // Reference to the current conveyor family
+	
+	//Constructors:
+	public SensorAgent(String name, List<String> type, ConveyorFamily cf) {
+		// Set the passed in values first
+		this.name = name;
+		this.type = type; // This list will be made synchronized within the conveyor family itself
+		this.cf = (ConveyorFamilyImp) cf;		
+		
+		// Then set the values that need to be initialized within this class, specifically
+		glassSheets = Collections.synchronizedList(new ArrayList<MyGlass>());
+	}
 
 	//Messages:
 	public void msgHereIsGlass(Glass glass) {

@@ -1,6 +1,7 @@
 package factory_v0_Tim.misc;
 
 import java.util.*;
+
 import factory_v0_Tim.agents.*;
 import shared.Glass;
 import shared.interfaces.*;
@@ -13,15 +14,27 @@ public class ConveyorFamilyImp {
 	//Data:
 	private ConveyorFamilyImp nextCF; // reference to the next ConveyorFamily – this could even be the final truck at the end of the line
 	private ConveyorFamilyImp prevCF; // reference to the previous conveyor family, will be NULL if it does not exist
-	private ConveyorAgent conveyor;
-	List<SensorAgent> sensors; // Will hold all of the sensors of different types in one place – adds to the modularity of the system
-	private PopUpAgent popUp; 
+	private Conveyor conveyor;
+	List<Sensor> sensors; // Will hold all of the sensors of different types in one place – adds to the modularity of the system
+	private PopUpAgent popUp;
+	private String name;
+	
+	//Constructor(s):
+	public ConveyorFamilyImp(String name, ConveyorFamilyImp prevCF, ConveyorFamilyImp nextCF, Conveyor conveyor, List<Sensor> sensors, PopUp popUp) {
+		this.name = name;
+		this.prevCF = prevCF;
+		this.nextCF = nextCF;
+		this.conveyor = (ConveyorAgent) conveyor;
+		this.sensors = sensors;
+		this.popUp = (PopUpAgent) popUp;
+	}
 
 	//Messages:
 	public void msgHereIsGlass(Glass g) {
-		for (SensorAgent s: sensors) {
+		for (Sensor s: sensors) {
 			if (s.getType().contains("entry")) {
 				s.msgHereIsGlass(g);
+				System.out.println(name + ": Found the entry sensor and sent the message with the glass!");
 				break;
 			}
 		}
@@ -29,18 +42,20 @@ public class ConveyorFamilyImp {
 
 	public void msgPositionFree() {
 		conveyor.msgPositionFree();
+		System.out.println(name + ": Messaged conveyor that glass can to passed to next conveyor system.");
 	}
 
 	public void msgDoneProcessingGlass(Glass g, int machineIndex) {
 		getPopUp().msgDoneProcessingGlass(g);
+		System.out.println(name + ": Messaged pop up with processed glass.");
 	}
 
-	public ConveyorAgent getConveyor() {
+	public Conveyor getConveyor() {
 		return conveyor;
 	}
 
 	public void setConveyor(Conveyor conveyor) {
-		this.conveyor = (ConveyorAgent) conveyor;
+		this.conveyor = conveyor;
 	}
 
 	public ConveyorFamilyImp getPrevCF() {
@@ -67,4 +82,7 @@ public class ConveyorFamilyImp {
 		this.nextCF = nextCF;
 	}
 
+	public String getName() {
+		return name;
+	}
 }
