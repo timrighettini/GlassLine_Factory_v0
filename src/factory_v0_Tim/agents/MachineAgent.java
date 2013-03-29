@@ -44,6 +44,13 @@ public class MachineAgent extends Agent implements Machine {
 		
 		// Then initialize everything else
 		glassToBeProcessed = Collections.synchronizedList(new ArrayList<MyGlass>());
+		initializeTransducerChannels();		
+	}
+	
+	private void initializeTransducerChannels() { // Initialize the transducer channels and everything else related to it
+		// Register any appropriate channels
+		transducer.register(this, TChannel.CROSS_SEAMER); // Set this agent to listen to the CROSS_SEAMER channel of the transducer
+		// This machine will be used for testing purposes this time around
 	}
 	
 	//Messages:
@@ -98,8 +105,10 @@ public class MachineAgent extends Agent implements Machine {
 	//Other Methods:
 	@Override
 	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		// TODO Auto-generated method stub
-		
+		if (args[0] instanceof Glass) { // There should be a glass reference from the GUI glass inside this array
+			Glass glass = (Glass) args[0];
+			msgDoneProcessingGlass(glass);						
+		}			
 	}
 
 	@Override
