@@ -10,6 +10,7 @@ import shared.interfaces.ConveyorFamily;
 import shared.interfaces.Machine;
 import transducer.TChannel;
 import transducer.TEvent;
+import transducer.Transducer;
 
 public class MachineAgent extends Agent implements Machine {
 
@@ -36,9 +37,9 @@ public class MachineAgent extends Agent implements Machine {
 	ConveyorFamilyImp cf; // Reference to the conveyor family.  This was not previously needed, because thr robot handled this, but now the robot agent is not being used, so the machine agent needs a reference to the conveyor family
 	
 	//Constructors:
-	public MachineAgent(String name, MachineType processType, ConveyorFamily cf) { // Will exclude the robot unless it is needed
+	public MachineAgent(String name, Transducer transducer, MachineType processType, ConveyorFamily cf) { // Will exclude the robot unless it is needed
 		// Initialize the variables based upon the constructor parameters first
-		this.name = name;
+		super(name, transducer);
 		this.cf = (ConveyorFamilyImp) cf;
 		this.processType = processType;
 		

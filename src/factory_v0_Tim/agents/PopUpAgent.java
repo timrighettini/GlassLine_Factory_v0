@@ -11,6 +11,7 @@ import shared.interfaces.Machine;
 import shared.interfaces.PopUp;
 import transducer.TChannel;
 import transducer.TEvent;
+import transducer.Transducer;
 
 public class PopUpAgent extends Agent implements PopUp {
 
@@ -57,9 +58,9 @@ public class PopUpAgent extends Agent implements PopUp {
 	ConveyorFamilyImp cf;
 	
 	// Constructors:
-	public PopUpAgent(String name, ConveyorFamily cf, List<Machine> machines) {  
+	public PopUpAgent(String name, Transducer transducer, ConveyorFamily cf, List<Machine> machines) {  
 		// Set the passed in values first
-		this.name = name;
+		super(name, transducer);
 		this.cf = (ConveyorFamilyImp) cf;		
 		
 		// Then set the values that need to be initialized within this class, specifically

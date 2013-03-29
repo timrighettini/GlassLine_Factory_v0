@@ -9,6 +9,7 @@ import shared.interfaces.Conveyor;
 import shared.interfaces.ConveyorFamily;
 import transducer.TChannel;
 import transducer.TEvent;
+import transducer.Transducer;
 import engine.agent.Agent;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
 
@@ -34,9 +35,9 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	ConveyorFamilyImp cf;
 	
 	// Constructors:
-	public ConveyorAgent(String name, ConveyorFamily cf) {
+	public ConveyorAgent(String name, Transducer transducer, ConveyorFamily cf) {
 		// Set the passed in values first
-		this.name = name;
+		super(name, transducer);
 		this.cf = (ConveyorFamilyImp) cf;		
 		
 		// Then set the values that need to be initialized within this class, specifically

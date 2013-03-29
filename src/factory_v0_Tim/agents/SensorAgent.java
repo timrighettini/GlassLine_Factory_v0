@@ -7,6 +7,7 @@ import shared.interfaces.ConveyorFamily;
 import shared.interfaces.Sensor;
 import transducer.TChannel;
 import transducer.TEvent;
+import transducer.Transducer;
 import engine.agent.Agent;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
 
@@ -37,9 +38,9 @@ public class SensorAgent extends Agent implements Sensor {
 	ConveyorFamilyImp cf; // Reference to the current conveyor family
 	
 	//Constructors:
-	public SensorAgent(String name, List<String> type, ConveyorFamily cf) {
+	public SensorAgent(String name, Transducer transducer, List<String> type, ConveyorFamily cf) {
 		// Set the passed in values first
-		this.name = name;
+		super(name, transducer);
 		this.type = type; // This list will be made synchronized within the conveyor family itself
 		this.cf = (ConveyorFamilyImp) cf;		
 		
