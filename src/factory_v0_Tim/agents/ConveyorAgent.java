@@ -128,8 +128,12 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	//Other Methods:
 	@Override
 	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		if (args[0] instanceof Boolean) { // There will only be one boolean argument as of now, and that tells whether the conveyor is on or off
-			conveyorOn = (Boolean) args[0];
-		}		
+		// Turn the conveyor on or off, depending on what the protocol is -- This is an update from the animation, Mock or not
+		if (event == TEvent.CONVEYOR_DO_START) {
+			conveyorOn = true;
+		}
+		else if (event == TEvent.CONVEYOR_DO_STOP) {
+			conveyorOn = false;
+		}
 	}
 }

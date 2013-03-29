@@ -13,11 +13,11 @@ public class MockAnimation implements TReceiver { // This will hold the mock ani
 	
 	// A mock conveyor that will only turn on or off
 	/** a boolean used to turn conveyor movement on or off */
-	private boolean conveyorMoving;
+	public boolean conveyorMoving;
 	
 	// A mock pop up that will only simulate the RISING,DROPPING,UP,DOWN actions;
-	private enum PopUpHeightState{UP,DOWN};
-	PopUpHeightState popUpHeight;
+	public enum PopUpHeightState{UP,DOWN};
+	public PopUpHeightState popUpHeight;
 	
 	//Constructors:
 	public MockAnimation(Transducer t) {
@@ -33,8 +33,22 @@ public class MockAnimation implements TReceiver { // This will hold the mock ani
 
 	@Override
 	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		// arg[0] will hold who fired the event
-		
+		if (event == TEvent.CONVEYOR_DO_START) {
+			conveyorMoving = true; // Set the height of the PopUp accordingly
+			transducer.fireEvent(TChannel.CONVEYOR, event, args); // Send a follow up message to the popUp
+		}
+		else if (event == TEvent.CONVEYOR_DO_STOP) {
+			conveyorMoving = false; // Set the height of the PopUp accordingly
+			transducer.fireEvent(TChannel.CONVEYOR, event, args); // Send a follow up message to the popUp
+		}
+		else if (event == TEvent.POPUP_DO_MOVE_DOWN) {
+			popUpHeight = PopUpHeightState.DOWN; // Set the height of the PopUp accordingly
+			transducer.fireEvent(TChannel.CONVEYOR, event, args); // Send a follow up message to the popUp
+		}
+		else if (event == TEvent.POPUP_DO_MOVE_UP) {
+			popUpHeight = PopUpHeightState.UP;
+			transducer.fireEvent(TChannel.CONVEYOR, event, args); // Send a follow up message to the popUp
+		}
 		
 	}
 

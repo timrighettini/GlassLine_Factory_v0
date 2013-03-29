@@ -147,9 +147,14 @@ public class PopUpAgent extends Agent implements PopUp {
 	//Other Methods:
 	@Override
 	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		if (args[0] instanceof Boolean) { // There will only be one boolean argument as of now, and that tells whether the popUp is UP or DOWN
-			popUpDown = (Boolean) args[0];
-		}			
+		// Move the PopUp up or down, depending on what the protocol is -- This is an update from the animation, Mock or not
+		if (event == TEvent.POPUP_DO_MOVE_DOWN) { // There will only be one boolean argument as of now, and that tells whether the popUp is UP or DOWN
+			popUpDown = true;
+		}
+		else if (event == TEvent.POPUP_DO_MOVE_UP) { // There will only be one boolean argument as of now, and that tells whether the popUp is UP or DOWN
+			popUpDown = false;
+		}
+		
 	}
 	
 	public int getFreeChannels() {
