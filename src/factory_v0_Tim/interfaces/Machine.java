@@ -1,4 +1,4 @@
-package shared.interfaces;
+package factory_v0_Tim.interfaces;
 
 import shared.Glass;
 import shared.enums.MachineType;

@@ -3,11 +3,11 @@ package factory_v0_Tim.agents;
 import java.util.*;
 
 import engine.agent.Agent;
+import factory_v0_Tim.interfaces.Machine;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
 import shared.Glass;
 import shared.enums.MachineType;
 import shared.interfaces.ConveyorFamily;
-import shared.interfaces.Machine;
 import transducer.TChannel;
 import transducer.TEvent;
 import transducer.Transducer;

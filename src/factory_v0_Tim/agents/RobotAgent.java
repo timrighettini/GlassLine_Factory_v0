@@ -5,11 +5,11 @@ import java.util.*;
 import shared.Glass;
 import shared.enums.MachineType;
 import shared.interfaces.ConveyorFamily;
-import shared.interfaces.Machine;
-import shared.interfaces.Robot;
 import transducer.TChannel;
 import transducer.TEvent;
 import engine.agent.Agent;
+import factory_v0_Tim.interfaces.Machine;
+import factory_v0_Tim.interfaces.Robot;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
 
 public class RobotAgent extends Agent implements Robot {

@@ -5,12 +5,12 @@ import java.util.*;
 import javax.swing.Popup;
 
 import shared.Glass;
-import shared.interfaces.Conveyor;
 import shared.interfaces.ConveyorFamily;
 import transducer.TChannel;
 import transducer.TEvent;
 import transducer.Transducer;
 import engine.agent.Agent;
+import factory_v0_Tim.interfaces.Conveyor;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
 
 public class ConveyorAgent extends Agent implements Conveyor {

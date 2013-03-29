@@ -3,6 +3,9 @@ package factory_v0_Tim.misc;
 import java.util.*;
 
 import factory_v0_Tim.agents.*;
+import factory_v0_Tim.interfaces.Conveyor;
+import factory_v0_Tim.interfaces.PopUp;
+import factory_v0_Tim.interfaces.Sensor;
 import shared.Glass;
 import shared.interfaces.*;
 

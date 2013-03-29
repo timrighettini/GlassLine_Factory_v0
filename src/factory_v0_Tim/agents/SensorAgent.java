@@ -4,11 +4,11 @@ import java.util.*;
 
 import shared.Glass;
 import shared.interfaces.ConveyorFamily;
-import shared.interfaces.Sensor;
 import transducer.TChannel;
 import transducer.TEvent;
 import transducer.Transducer;
 import engine.agent.Agent;
+import factory_v0_Tim.interfaces.Sensor;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
 
 public class SensorAgent extends Agent implements Sensor {
