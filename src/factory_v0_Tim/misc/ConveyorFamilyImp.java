@@ -3,9 +3,7 @@ package factory_v0_Tim.misc;
 import java.util.*;
 
 import factory_v0_Tim.agents.*;
-import factory_v0_Tim.interfaces.Conveyor;
-import factory_v0_Tim.interfaces.PopUp;
-import factory_v0_Tim.interfaces.Sensor;
+import factory_v0_Tim.interfaces.*;
 import shared.Glass;
 import shared.interfaces.*;
 
@@ -15,11 +13,11 @@ public class ConveyorFamilyImp implements ConveyorFamily {
 	//Description:  Will act as a wrapper class for a set of conveyors, sensors, and pop-ups.  It will also contain a reference to robots and machines through its components
 
 	//Data:
-	private ConveyorFamilyImp nextCF; // reference to the next ConveyorFamily – this could even be the final truck at the end of the line
-	private ConveyorFamilyImp prevCF; // reference to the previous conveyor family, will be NULL if it does not exist
+	private ConveyorFamily nextCF; // reference to the next ConveyorFamily – this could even be the final truck at the end of the line
+	private ConveyorFamily prevCF; // reference to the previous conveyor family, will be NULL if it does not exist
 	private Conveyor conveyor;
-	List<Sensor> sensors; // Will hold all of the sensors of different types in one place – adds to the modularity of the system
-	private PopUpAgent popUp;
+	private List<Sensor> sensors; // Will hold all of the sensors of different types in one place – adds to the modularity of the system
+	private PopUp popUp;
 	private String name;
 	
 	//Constructors:
@@ -29,7 +27,7 @@ public class ConveyorFamilyImp implements ConveyorFamily {
 		this.nextCF = nextCF;
 		this.conveyor = (ConveyorAgent) conveyor;
 		this.sensors = sensors;
-		this.popUp = (PopUpAgent) popUp;
+		this.popUp = popUp;
 	}
 
 	//Messages:
@@ -63,7 +61,7 @@ public class ConveyorFamilyImp implements ConveyorFamily {
 		this.conveyor = conveyor;
 	}
 
-	public ConveyorFamilyImp getPrevCF() {
+	public ConveyorFamily getPrevCF() {
 		return prevCF;
 	}
 
@@ -71,15 +69,15 @@ public class ConveyorFamilyImp implements ConveyorFamily {
 		this.prevCF = (ConveyorFamilyImp) prevCF;
 	}
 
-	public PopUpAgent getPopUp() {
+	public PopUp getPopUp() {
 		return popUp;
 	}
 
 	public void setPopUp(PopUp popUp) {
-		this.popUp = (PopUpAgent) popUp;
+		this.popUp = popUp;
 	}
 
-	public ConveyorFamilyImp getNextCF() {
+	public ConveyorFamily getNextCF() {
 		return nextCF;
 	}
 

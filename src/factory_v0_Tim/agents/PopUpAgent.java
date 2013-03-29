@@ -23,10 +23,10 @@ public class PopUpAgent extends Agent implements PopUp {
 	// Data:	
 	enum processState {unprocessed, doneProcessing}; 
 
-	private class MyGlass {
+	public class MyGlassPopUp {
 		Glass glass;
 		processState processState;
-		public MyGlass(Glass glass, processState processState) {
+		public MyGlassPopUp(Glass glass, processState processState) {
 			this.glass = glass;
 			this.processState = processState;
 		}
@@ -39,7 +39,7 @@ public class PopUpAgent extends Agent implements PopUp {
 		MachineAgent machine; // Robot reference
 		boolean inUse; // Is this channel currently occupied by a piece of glass
 		MachineType processType; // What process does this robot do?  Does the glass need to undergo this process?
-		MyGlass glassBeingProcessed; // This reference needs to be held so PopUpAgents know which piece of glass is being processed by the robot.  This name will be abbreviated to glassBeingProcessed.
+		MyGlassPopUp glassBeingProcessed; // This reference needs to be held so PopUpAgents know which piece of glass is being processed by the robot.  This name will be abbreviated to glassBeingProcessed.
 		
 		public MachineCom(Machine machine) {
 			this.machine = (MachineAgent) machine;
@@ -49,13 +49,13 @@ public class PopUpAgent extends Agent implements PopUp {
 		}
 	}
 
-	List<MyGlass> glassToBeProcessed; // This name will be abbreviated as glassToBeProcessed in many functions to save on space and complexity
-	List<MachineCom> machineComs; 
+	private List<MyGlassPopUp> glassToBeProcessed; // This name will be abbreviated as glassToBeProcessed in many functions to save on space and complexity
+	private List<MachineCom> machineComs; 
 
 	// Positional variable for whether the Pop-Up in the GUI is up or down, and it will be changed through the transducer and checked within one of the scheduler rules
-	boolean popUpDown; // Is this value is true, then the associated popUp is down (will be changed through the appropriate transducer eventFired(args[]) function.
+	private boolean popUpDown; // Is this value is true, then the associated popUp is down (will be changed through the appropriate transducer eventFired(args[]) function.
 	
-	ConveyorFamilyImp cf;
+	private ConveyorFamilyImp cf;
 	
 	// Constructors:
 	public PopUpAgent(String name, Transducer transducer, ConveyorFamily cf, List<Machine> machines) {  
@@ -64,7 +64,7 @@ public class PopUpAgent extends Agent implements PopUp {
 		this.cf = (ConveyorFamilyImp) cf;		
 		
 		// Then set the values that need to be initialized within this class, specifically
-		glassToBeProcessed = Collections.synchronizedList(new ArrayList<MyGlass>());
+		glassToBeProcessed = Collections.synchronizedList(new ArrayList<MyGlassPopUp>());
 		machineComs = Collections.synchronizedList(new ArrayList<MachineCom>());
 		
 		// This loop will go for the number of machines that are in the amchines argument
@@ -84,13 +84,13 @@ public class PopUpAgent extends Agent implements PopUp {
 
 	//Messages:
 	public void msgGiveGlassToPopUp(Glass g) { // Get Glass from conveyor to PopUp
-		glassToBeProcessed.add(new MyGlass(g, processState.unprocessed));
+		glassToBeProcessed.add(new MyGlassPopUp(g, processState.unprocessed));
 		print("Glass with ID (" + g.getId() + ") added");
 		stateChanged();
 	}
 
 	public void msgDoneProcessingGlass(Glass g) {
-		glassToBeProcessed.add(new MyGlass(g, processState.doneProcessing));
+		glassToBeProcessed.add(new MyGlassPopUp(g, processState.doneProcessing));
 		for (MachineCom com: machineComs) {
 			if (com.glassBeingProcessed.glass.getId() == g.getId()) {
 				com.inUse = false;
@@ -105,7 +105,7 @@ public class PopUpAgent extends Agent implements PopUp {
 
 	//Scheduler:
 	public boolean pickAndExecuteAnAction() {
-		for (MyGlass g: glassToBeProcessed) {
+		for (MyGlassPopUp g: glassToBeProcessed) {
 			if (g.processState == processState.unprocessed) {
 				for (MachineCom com: machineComs) {
 					if (com.inUse == false && popUpDown == true) {
@@ -114,7 +114,7 @@ public class PopUpAgent extends Agent implements PopUp {
 				}
 			}
 		}
-		for (MyGlass g: glassToBeProcessed) {
+		for (MyGlassPopUp g: glassToBeProcessed) {
 			if (g.processState == processState.doneProcessing) {
 				actPassGlassToConveyor(g); return true;
 			}
@@ -123,7 +123,7 @@ public class PopUpAgent extends Agent implements PopUp {
 	}
 
 	//Actions:
-	private void actPassGlassToRobot(MyGlass g, MachineCom com) {
+	private void actPassGlassToRobot(MyGlassPopUp g, MachineCom com) {
 		if (g.glass.getRecipe().containsKey(com.processType)) {
 			com.machine.msgProcessGlass(g.glass);
 			print("Glass with ID (" + g.glass.getId() + ") passed to Machine " + com.machine.getName() + "for processing");
@@ -138,7 +138,7 @@ public class PopUpAgent extends Agent implements PopUp {
 		}
 	}
 
-	private void actPassGlassToConveyor(MyGlass g) {
+	private void actPassGlassToConveyor(MyGlassPopUp g) {
 		cf.getConveyor().msgUpdateGlass(g.glass);
 		print("Glass with ID (" + g.glass.getId() + ") passed to conveyor");
 		glassToBeProcessed.remove(g);
@@ -170,4 +170,19 @@ public class PopUpAgent extends Agent implements PopUp {
 		
 		return freeChannels;
 	}
+
+	/**
+	 * @return the glassToBeProcessed
+	 */
+	public List<MyGlassPopUp> getGlassToBeProcessed() {
+		return glassToBeProcessed;
+	}
+
+	/**
+	 * @return the popUpDown
+	 */
+	public boolean isPopUpDown() {
+		return popUpDown;
+	}
+
 }

@@ -15,12 +15,12 @@ public interface ConveyorFamily {
 	// Getters/Setters
 	public abstract Conveyor getConveyor();
 	public abstract void setConveyor(Conveyor conveyor);
-	public abstract ConveyorFamilyImp getPrevCF();
+	public abstract ConveyorFamily getPrevCF();
 	public abstract void setPrevCF(ConveyorFamily prevCF);
-	public abstract PopUpAgent getPopUp();
+	public abstract PopUp getPopUp();
 	public abstract void setPopUp(PopUp popUp);
-	public abstract ConveyorFamilyImp getNextCF();
-	public abstract void setNextCF(ConveyorFamilyImp nextCF);
+	public abstract ConveyorFamily getNextCF();
+	public abstract void setNextCF(ConveyorFamily nextCF);
 	public abstract String getName();	
 	public abstract Sensor getSensor(String arg);
 }
