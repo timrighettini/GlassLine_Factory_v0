@@ -2,6 +2,8 @@ package factory_v0_Tim.interfaces;
 
 import java.util.List;
 
+import factory_v0_Tim.agents.SensorAgent.MyGlass;
+
 import shared.Glass;
 
 public interface Sensor {
@@ -11,4 +13,5 @@ public interface Sensor {
 	
 	// This method will be used to get the type for the sensor in both real sensors and mock sensors
 	public abstract List<String> getType();
+	public abstract List<MyGlass> getGlassSheets();
 }

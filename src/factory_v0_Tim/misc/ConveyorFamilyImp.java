@@ -90,6 +90,15 @@ public class ConveyorFamilyImp implements ConveyorFamily {
 	public String getName() {
 		return name;
 	}
+	
+	public Sensor getSensor(String arg) {
+		for (Sensor s: sensors) {
+			if (s.getType().contains(arg)) {
+				return s;
+			}
+		}
+		return null;
+	}
 
 	@Override
 	public void msgGlassDone(Glass glass, int machineIndex) {

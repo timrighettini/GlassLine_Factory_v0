@@ -97,7 +97,10 @@ public class ConveyorAgent extends Agent implements Conveyor {
 		for (MyGlass g: glassSheets) {
 			if (g.conveyorState == conveyorState.passPopUp && cf.getPopUp().glassToBeProcessed.isEmpty() == true) {
 				if (cf.getPopUp().getFreeChannels() > 0) {						
-					// This rule will only work when the glassSheet is supposed to go to the PopUp, when there is nothing on the pop-up, and when there is a available robot to process the glass
+					// This rule will only work when:
+					// 1. the glassSheet is supposed to go to the PopUp, 
+					// 2. when there is nothing on the pop-up, and
+					// 3. when there is a available machine to process the glass
 					actPassGlassToPopUp(g); return true;
 				}	
 			}

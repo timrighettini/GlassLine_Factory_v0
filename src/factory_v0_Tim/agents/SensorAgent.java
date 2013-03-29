@@ -21,7 +21,7 @@ public class SensorAgent extends Agent implements Sensor {
 	public enum onSensor {justEntered, yes, no}; // Is the glass on an given sensor?
 	public enum location {entry, popup, exit}; // Which sensor the glass is currently on – this will not be needed if using the multiple inheritance design paradigm
 	
-	private class MyGlass {
+	public class MyGlass {
 		Glass glass; // Holds a reference to the glass
 		onSensor onSensor; 
 		location location; 
@@ -110,14 +110,20 @@ public class SensorAgent extends Agent implements Sensor {
 		if (g.location == location.entry) {
 			cf.getConveyor().msgGiveGlassToConveyor(g.glass);
 			print("Glass with ID (" + g.glass.getId() + ") passed to conveyor (for entry)");
+			// Make sure to turn on the conveyor, assuming that nothing is waiting at somewhere else on the conveyor
+			turnOnOffConveyor();
 		}
 		else if (g.location == location.popup) { 
 			cf.getConveyor().msgGiveGlassToPopUp(g.glass);
 			print("Glass with ID (" + g.glass.getId() + ") passed to conveyor (for popUp)");
+			// Make sure to turn on the conveyor, assuming that nothing is waiting at somewhere else on the conveyor
+			turnOnOffConveyor();
 		}
 		else if (g.location == location.exit) { 
 			cf.getConveyor().msgPassOffGlass(g.glass);
 			print("Glass with ID (" + g.glass.getId() + ") passed to conveyor (for exit)");
+			// Make sure to turn on the conveyor, assuming that nothing is waiting at somewhere else on the conveyor
+			turnOnOffConveyor();
 		}
 	}
 
@@ -130,6 +136,39 @@ public class SensorAgent extends Agent implements Sensor {
 	}
 
 	//Other Methods:
+	private void turnOnOffConveyor() { // The method will run through the sensors and the conveyor state and make sure that it is not already stopped for some reason
+		// Check to see if the conveyor is off, first
+		if (cf.getConveyor() instanceof ConveyorAgent) {
+			ConveyorAgent conv = (ConveyorAgent) cf.getConveyor();
+			if (conv.conveyorOn == false) {
+				// Check WHY this conveyor could be off -- if it is off for any of the following reasons, leave it off
+				
+				if (cf.getPopUp().popUpDown == false) { return; } // Is the popUp still up?
+				if (cf.getPopUp().glassToBeProcessed.size() > 0 && cf.getSensor("popUp").getGlassSheets().size() > 0) { return; } // Is there still something on the popUp sensor and is there still glass beiong processed?
+				
+				// If these conditions do not exist, turn on the conveyor
+				transducer.fireEvent(TChannel.ALL_GUI, TEvent.CONVEYOR_DO_START, null);
+			}
+			else { // Then the conveyor must be on
+				// If any of the following conditions are met, turn off the conveyor, else, leave it on
+				if (cf.getPopUp().popUpDown == false) {	
+					transducer.fireEvent(TChannel.ALL_GUI, TEvent.CONVEYOR_DO_STOP, null);
+					return;
+				} // Is the popUp still up?
+				
+				if (cf.getPopUp().glassToBeProcessed.size() > 0 && cf.getSensor("popUp").getGlassSheets().size() > 0) { 
+					transducer.fireEvent(TChannel.ALL_GUI, TEvent.CONVEYOR_DO_STOP, null);
+					return; 
+				} // Is there still something on the popUp sensor and is there still glass beiong processed?
+
+				if (conv.glassSheets.size() == 0) {
+					transducer.fireEvent(TChannel.ALL_GUI, TEvent.CONVEYOR_DO_STOP, null);
+					return; 
+				} // The conveyor does not need to be on when there is no glass on it
+			}
+		}
+	}
+	
 	@Override
 	public void eventFired(TChannel channel, TEvent event, Object[] args) {
 		// For the sensorAgent, args[] will only contain ONE index with an argument for which sensor needs to be accessed and ANOTHER argument with the glass piece
@@ -144,5 +183,9 @@ public class SensorAgent extends Agent implements Sensor {
 	
 	public List<String> getType() {
 		return type;
+	}
+	
+	public List<MyGlass> getGlassSheets() {
+		return glassSheets;		
 	}
 }
