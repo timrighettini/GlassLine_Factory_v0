@@ -30,6 +30,7 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	}
 	List<MyGlass> glassSheets; // List to hold all of the glass sheets
 	boolean positionFreeNextCF; // Will determine if a piece of glass should be passed to the next conveyor family.  This will initially be set to true.
+	boolean conveyorOn;
 	ConveyorFamilyImp cf;
 	
 	// Constructors:
@@ -41,6 +42,14 @@ public class ConveyorAgent extends Agent implements Conveyor {
 		// Then set the values that need to be initialized within this class, specifically
 		glassSheets = Collections.synchronizedList(new ArrayList<MyGlass>());
 		positionFreeNextCF = true; // Obviously, there will be nothing in the next conveyor set when the system initializes, so I can make the assumption that nothing is there too
+		conveyorOn = false; // The conveyor is off when this simulation starts
+		
+		initializeTransducerChannels();		
+	}
+	
+	private void initializeTransducerChannels() { // Initialize the transducer channels and everything else related to it
+		// Register any appropriate channels
+		transducer.register(this, TChannel.CONVEYOR); // Set this agent to listen to the CONVEYOR channel of the transducer
 	}
 
 	//Messages:
@@ -118,7 +127,8 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	//Other Methods:
 	@Override
 	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		// TODO Auto-generated method stub
-		
+		if (args[0] instanceof Boolean) { // There will only be one boolean argument as of now, and that tells whether the conveyor is on or off
+			conveyorOn = (Boolean) args[0];
+		}		
 	}
 }

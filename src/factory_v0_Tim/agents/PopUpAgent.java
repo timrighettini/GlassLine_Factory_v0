@@ -72,7 +72,14 @@ public class PopUpAgent extends Agent implements PopUp {
 		}
 		
 		popUpDown = false; // The popUp has to be down when the system starts...
+		initializeTransducerChannels();		
 	}
+	
+	private void initializeTransducerChannels() { // Initialize the transducer channels and everything else related to it
+		// Register any appropriate channels
+		transducer.register(this, TChannel.POPUP); // Set this agent to listen to the POPUP channel of the transducer
+	}
+
 
 	//Messages:
 	public void msgGiveGlassToPopUp(Glass g) { // Get Glass from conveyor to PopUp
@@ -139,8 +146,9 @@ public class PopUpAgent extends Agent implements PopUp {
 	//Other Methods:
 	@Override
 	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		// TODO Auto-generated method stub
-		
+		if (args[0] instanceof Boolean) { // There will only be one boolean argument as of now, and that tells whether the popUp is UP or DOWN
+			popUpDown = (Boolean) args[0];
+		}			
 	}
 	
 	public int getFreeChannels() {

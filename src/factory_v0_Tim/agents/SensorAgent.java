@@ -45,6 +45,14 @@ public class SensorAgent extends Agent implements Sensor {
 		
 		// Then set the values that need to be initialized within this class, specifically
 		glassSheets = Collections.synchronizedList(new ArrayList<MyGlass>());
+		
+		// Initialize the transducer channels
+		initializeTransducerChannels();
+	}
+	
+	private void initializeTransducerChannels() { // Initialize the transducer channels and everything else related to it
+		// Register any appropriate channels
+		transducer.register(this, TChannel.SENSOR); // Set this agent to listen to the SENSOR channel of the transducer
 	}
 
 	//Messages:
@@ -123,8 +131,14 @@ public class SensorAgent extends Agent implements Sensor {
 	//Other Methods:
 	@Override
 	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		// TODO Auto-generated method stub
-		
+		// For the sensorAgent, args[] will only contain ONE index with an argument for which sensor needs to be accessed and ANOTHER argument with the glass piece
+		if (args[0] instanceof Glass && args[1] instanceof String && args.length == 2) { // There should be a glass reference from the GUI glass inside this array
+			if(args[0].equals("popup") || args[0].equals("exit")) {
+				Glass glass = (Glass) args[0];
+				String sensorString = (String) args[1];
+				msgHereIsGlassTransducer(glass, sensorString);
+			}			
+		}		
 	}
 	
 	public List<String> getType() {
