@@ -30,18 +30,21 @@ public class MachineAgent extends Agent implements Machine {
 		}
 	}
 
-	List<MyGlass> glassToBeProcessed;
-	RobotAgent robot; // Need a reference to the attached robot
-	MachineType processType; // Designates what process this machine performs
+	private List<MyGlass> glassToBeProcessed;
+	private RobotAgent robot; // Need a reference to the attached robot
+	private MachineType processType; // Designates what process this machine performs
 	
-	ConveyorFamilyImp cf; // Reference to the conveyor family.  This was not previously needed, because thr robot handled this, but now the robot agent is not being used, so the machine agent needs a reference to the conveyor family
+	private ConveyorFamilyImp cf; // Reference to the conveyor family.  This was not previously needed, because thr robot handled this, but now the robot agent is not being used, so the machine agent needs a reference to the conveyor family
+	
+	private int machineChannel; // The channel number for this machine, which will be 0 or 1
 	
 	//Constructors:
-	public MachineAgent(String name, Transducer transducer, MachineType processType, ConveyorFamily cf) { // Will exclude the robot unless it is needed
+	public MachineAgent(String name, Transducer transducer, MachineType processType, int machineChannel, ConveyorFamily cf) { // Will exclude the robot unless it is needed
 		// Initialize the variables based upon the constructor parameters first
 		super(name, transducer);
 		this.cf = (ConveyorFamilyImp) cf;
 		this.processType = processType;
+		this.machineChannel = machineChannel;
 		
 		// Then initialize everything else
 		glassToBeProcessed = Collections.synchronizedList(new ArrayList<MyGlass>());
@@ -99,7 +102,7 @@ public class MachineAgent extends Agent implements Machine {
 		g.glass.getRecipe().remove(this.processType); // Done with process, does not need to be in recipe anymore
 		print("Glass with ID (" + g.glass.getId() + ") passed to PopUp");
 		//robot.msgDoneProcessingGlass(g.glass);
-		cf.getPopUp().msgDoneProcessingGlass(g.glass);
+		cf.msgGlassDone(g.glass, 0);
 		glassToBeProcessed.remove(g);
 	}
 

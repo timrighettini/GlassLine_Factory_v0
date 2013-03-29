@@ -112,7 +112,7 @@ public class RobotAgent extends Agent implements Robot {
 	}
 
 	private void actPassGlassToCF(MyGlass g) {
-		cf.msgDoneProcessingGlass(g.glass, 0);
+		cf.msgGlassDone(g.glass, 0);
 		glassToBeProcessed.remove(g);
 	}
 

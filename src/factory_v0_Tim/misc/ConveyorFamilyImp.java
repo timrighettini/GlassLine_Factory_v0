@@ -46,7 +46,7 @@ public class ConveyorFamilyImp implements ConveyorFamily {
 		System.out.println(name + ": Messaged conveyor that glass can to passed to next conveyor system.");
 	}
 
-	public void msgDoneProcessingGlass(Glass g, int machineIndex) {
+	public void msgGlassDone(Glass g, int machineIndex) {
 		getPopUp().msgDoneProcessingGlass(g);
 		System.out.println(name + ": Messaged pop up with processed glass.");
 	}
@@ -81,7 +81,7 @@ public class ConveyorFamilyImp implements ConveyorFamily {
 		return nextCF;
 	}
 
-	public void setNextCF(ConveyorFamilyImp nextCF) {
+	public void setNextCF(ConveyorFamily nextCF) {
 		this.nextCF = nextCF;
 	}
 
@@ -96,11 +96,5 @@ public class ConveyorFamilyImp implements ConveyorFamily {
 			}
 		}
 		return null;
-	}
-
-	@Override
-	public void msgGlassDone(Glass glass, int machineIndex) {
-		// TODO Auto-generated method stub
-		
 	}
 }
