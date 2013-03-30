@@ -6,6 +6,8 @@ import engine.agent.Agent;
 import factory_v0_Tim.interfaces.Machine;
 import factory_v0_Tim.interfaces.PopUp;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
+import factory_v0_Tim.misc.MyGlassPopUp;
+import factory_v0_Tim.misc.MyGlassPopUp.processState;
 import shared.Glass;
 import shared.enums.MachineType;
 import shared.interfaces.ConveyorFamily;
@@ -21,20 +23,6 @@ public class PopUpAgent extends Agent implements PopUp {
 	// Of course, this agent may not be needed because there is NO ROBOT in the animation. but I will leave it in for now.
 
 	// Data:	
-	enum processState {unprocessed, doneProcessing}; 
-
-	public class MyGlassPopUp {
-		Glass glass;
-		processState processState;
-		public MyGlassPopUp(Glass glass, processState processState) {
-			this.glass = glass;
-			this.processState = processState;
-		}
-	}
-	// The reason why there is not a middle stage is because this glass is removed from the pop-up 
-	// during processing – there should be no reference to a glass sheet that is being processed in the 
-	// pop-up agent when it is not with the pop-up agent and with the robot or machine agents
-
 	private class MachineCom { // Will hold a communication channel to a robot, allowing for the possibility to communicate to multiple robots at once
 		MachineAgent machine; // Robot reference
 		boolean inUse; // Is this channel currently occupied by a piece of glass
@@ -61,7 +49,7 @@ public class PopUpAgent extends Agent implements PopUp {
 	public PopUpAgent(String name, Transducer transducer, ConveyorFamily cf, List<Machine> machines) {  
 		// Set the passed in values first
 		super(name, transducer);
-		this.cf = (ConveyorFamilyImp) cf;		
+		this.cf = cf;		
 		
 		// Then set the values that need to be initialized within this class, specifically
 		glassToBeProcessed = Collections.synchronizedList(new ArrayList<MyGlassPopUp>());

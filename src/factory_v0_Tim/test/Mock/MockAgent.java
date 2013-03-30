@@ -5,6 +5,7 @@ package factory_v0_Tim.test.Mock;
 
 import transducer.TChannel;
 import transducer.TEvent;
+import transducer.Transducer;
 import engine.agent.Agent;
 
 /**
@@ -19,8 +20,8 @@ public class MockAgent extends Agent {
 	
 	public EventLog log = new EventLog(); // Will use this in my MockAgents 
 
-	public MockAgent(String name) {
-		this.name = name;
+	public MockAgent(String name, Transducer transducer) {
+		super(name, transducer);
 	}
 
 	public String getName() {

@@ -2,7 +2,7 @@ package factory_v0_Tim.interfaces;
 
 import java.util.List;
 
-import factory_v0_Tim.agents.SensorAgent.MyGlassSensor;
+import factory_v0_Tim.misc.MyGlassSensor;
 
 import shared.Glass;
 

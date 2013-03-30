@@ -2,7 +2,7 @@ package factory_v0_Tim.interfaces;
 
 import java.util.List;
 
-import factory_v0_Tim.agents.PopUpAgent.MyGlassPopUp;
+import factory_v0_Tim.misc.MyGlassPopUp;
 
 import shared.Glass;
 

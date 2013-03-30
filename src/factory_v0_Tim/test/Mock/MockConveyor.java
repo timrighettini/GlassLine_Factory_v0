@@ -1,25 +1,19 @@
-package factory_v0_Tim.agents;
+package factory_v0_Tim.test.Mock;
 
-import java.util.*;
-
-import javax.swing.Popup;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import shared.Glass;
 import shared.interfaces.ConveyorFamily;
 import transducer.TChannel;
-import transducer.TEvent;
 import transducer.Transducer;
-import engine.agent.Agent;
 import factory_v0_Tim.interfaces.Conveyor;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
 import factory_v0_Tim.misc.MyGlassConveyor;
 import factory_v0_Tim.misc.MyGlassConveyor.conveyorState;
 
-public class ConveyorAgent extends Agent implements Conveyor {
-	//Name: ConveyorAgent
-
-	//Description:  Will hold the glass until it needs to go into the next conveyor for a different set of processes, or to leave the factory entirely.
-
+public class MockConveyor extends MockAgent implements Conveyor {
 	//Data:
 	private List<MyGlassConveyor> glassSheets; // List to hold all of the glass sheets
 	private boolean positionFreeNextCF; // Will determine if a piece of glass should be passed to the next conveyor family.  This will initially be set to true.
@@ -27,10 +21,10 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	private ConveyorFamily cf;
 	
 	// Constructors:
-	public ConveyorAgent(String name, Transducer transducer, ConveyorFamily cf) {
+	public MockConveyor(String name, Transducer transducer, ConveyorFamily cf) {
 		// Set the passed in values first
 		super(name, transducer);
-		this.cf = cf;		
+		this.cf = (ConveyorFamilyImp) cf;		
 		
 		// Then set the values that need to be initialized within this class, specifically
 		glassSheets = Collections.synchronizedList(new ArrayList<MyGlassConveyor>());
@@ -44,12 +38,13 @@ public class ConveyorAgent extends Agent implements Conveyor {
 		// Register any appropriate channels
 		transducer.register(this, TChannel.CONVEYOR); // Set this agent to listen to the CONVEYOR channel of the transducer
 	}
+	
+	// Messages/Actions
 
 	//Messages:
 	public void msgGiveGlassToConveyor(Glass g) {
 		glassSheets.add(new MyGlassConveyor(g, conveyorState.onConveyor)); // conveyorState will always initializes to onConveyor
 		print("Glass with ID (" + g.getId() + ") added to conveyor");
-		stateChanged();
 	}
 	
 	public void msgGiveGlassToPopUp(Glass g) {
@@ -57,7 +52,6 @@ public class ConveyorAgent extends Agent implements Conveyor {
 			if (glass.glass.getId() == g.getId()) {
 				glass.conveyorState = conveyorState.passPopUp;
 				print("Glass with ID (" + glass.glass.getId() + ") soon going to PopUp");
-				stateChanged();
 				break;
 			}
 		}
@@ -68,7 +62,6 @@ public class ConveyorAgent extends Agent implements Conveyor {
 			if (glass.glass.getId() == g.getId()) {
 				glass.conveyorState = conveyorState.passCF;
 				print("Glass with ID (" + glass.glass.getId() + ") soon going to next ConveyorFamily");
-				stateChanged();
 			}
 		}
 	}
@@ -76,36 +69,12 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	public void msgPositionFree() {
 		positionFreeNextCF = true;
 		print("Next conveyor is available for a piece of glass.");
-		stateChanged();
 	}
 
 	public void msgUpdateGlass(Glass g) { // This message is akin to a stub, but I wanted to match up to my current interaction diagram – I could just call msgGiveGlassToConveyor directly, but the semantics do not look as good that way
 		msgGiveGlassToConveyor(g); 
-		stateChanged();
 	}
 
-	//Scheduler:
-	public boolean pickAndExecuteAnAction() {
-		for (MyGlassConveyor g: glassSheets) {
-			if (g.conveyorState == conveyorState.passPopUp && cf.getPopUp().getGlassToBeProcessed().isEmpty() == true) {
-				if (cf.getPopUp().getFreeChannels() > 0) {						
-					// This rule will only work when:
-					// 1. the glassSheet is supposed to go to the PopUp, 
-					// 2. when there is nothing on the pop-up, and
-					// 3. when there is a available machine to process the glass
-					actPassGlassToPopUp(g); return true;
-				}	
-			}
-				
-		}
-		for (MyGlassConveyor g: glassSheets) {
-			if (g.conveyorState == conveyorState.passCF && positionFreeNextCF == true) {
-				actPassGlassToNextCF(g); return true;
-			}
-		}
-		return false;
-	}
-	
 	//Actions:
 	private void actPassGlassToPopUp(MyGlassConveyor g) {
 		cf.getPopUp().msgGiveGlassToPopUp(g.glass);
@@ -119,30 +88,17 @@ public class ConveyorAgent extends Agent implements Conveyor {
 		glassSheets.remove(g);
 		positionFreeNextCF = false;
 	}
+	
+	// Getters and Setters
 
-	//Other Methods:
 	@Override
-	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		// Turn the conveyor on or off, depending on what the protocol is -- This is an update from the animation, Mock or not
-		if (event == TEvent.CONVEYOR_DO_START) {
-			conveyorOn = true;
-		}
-		else if (event == TEvent.CONVEYOR_DO_STOP) {
-			conveyorOn = false;
-		}
-	}
-
-	/**
-	 * @return the conveyorOn
-	 */
 	public boolean isConveyorOn() {
 		return conveyorOn;
 	}
 
-	/**
-	 * @return the glassSheets
-	 */
+	@Override
 	public List<MyGlassConveyor> getGlassSheets() {
 		return glassSheets;
 	}
+
 }

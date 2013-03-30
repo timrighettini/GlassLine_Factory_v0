@@ -10,6 +10,9 @@ import transducer.Transducer;
 import engine.agent.Agent;
 import factory_v0_Tim.interfaces.Sensor;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
+import factory_v0_Tim.misc.MyGlassSensor;
+import factory_v0_Tim.misc.MyGlassSensor.location;
+import factory_v0_Tim.misc.MyGlassSensor.onSensor;
 
 public class SensorAgent extends Agent implements Sensor {
 
@@ -17,22 +20,7 @@ public class SensorAgent extends Agent implements Sensor {
 
 	//Description: Will detect if a piece of glass has entered, exited, or on a popup for any given set of conveyors.  Even though all of the sensor functionality currently melded into one agent, I may split this agent up into a base agent and three inheritance agents – EntrySensorAgent, ExitSensorAgent, and PopUpSensorAgent – during implementation
 
-	//Data:	
-	public enum onSensor {justEntered, yes, no}; // Is the glass on an given sensor?
-	public enum location {entry, popup, exit}; // Which sensor the glass is currently on – this will not be needed if using the multiple inheritance design paradigm
-	
-	public class MyGlassSensor {
-		Glass glass; // Holds a reference to the glass
-		onSensor onSensor; 
-		location location; 
-		
-		public MyGlassSensor(Glass glass, location location, onSensor onSensor) {
-			this.glass = glass;
-			this.location = location;
-			this.onSensor = onSensor;
-		}		
-	}	
-
+	//Data:
 	private List<String> type; // Will hold the type of sensor this is, and it may be of more than one type
 	private List<MyGlassSensor> glassSheets; // Will hold all glass references
 	private ConveyorFamily cf; // Reference to the current conveyor family
@@ -42,7 +30,7 @@ public class SensorAgent extends Agent implements Sensor {
 		// Set the passed in values first
 		super(name, transducer);
 		this.type = type; // This list will be made synchronized within the conveyor family itself
-		this.cf = (ConveyorFamilyImp) cf;		
+		this.cf = cf;		
 		
 		// Then set the values that need to be initialized within this class, specifically
 		glassSheets = Collections.synchronizedList(new ArrayList<MyGlassSensor>());
