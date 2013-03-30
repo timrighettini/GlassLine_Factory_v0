@@ -27,7 +27,7 @@ public class SensorTestCases {
 	// These cases will only test to make sure that the INNER functionality of this agent works.  These tests will not involve the entire coveyor family
 	
 	@Test
-	public void sensorAgentTest() {
+	public void threeMainSensorAgentTests() {
 		/**
 		 * This test will complete the following objectives:  Test all of the sensor agent functionality LOCAL to the agent so that we can see that the sensor agents work
 		 * How this test will work:
@@ -86,6 +86,8 @@ public class SensorTestCases {
 		 * 		h.  Run scheduler
 		 * 		i.  Check postconditions:  Entry sensor has no glass, Mock Conveyor Has glass, Mock Conveyor Family received positionFree msg(), and that GUI conveyor is still on
 		 */
+		
+		System.out.println("/****************Test: threeMainSensorAgentTests****************/");
 		
 		// Create a piece of glass to use for the test
 		Glass glass = new Glass(); // Since processing is not an issue with this test, let's just leave that field blank
@@ -333,6 +335,158 @@ public class SensorTestCases {
 		// Check for the following postconditions:
 		assertTrue(realCF.getSensor("exit").getGlassSheets().size() == 0); // Entry sensor should not have the glass now
 		assertTrue(realCF.getConveyor().getGlassSheets().size() == 0); // Mock conveyor does not has the glass	
+	}
+	
+	@Test
+	public void secondarySensorAgentTestTwoPlusGlass() {
+		/**
+		 * This test will complete the following objective: check to see that the conveyor stays on when 2+ glasses are on the conveyor, and one is leaving
+		 * How this test will work:
+		 * 1.  Two pieces of glass will be loaded into a mock conveyor, and then at the exit sensor removal stage, the conveyorOn status will be checked
+		 * 2.  This test will be really basic, and will use the shortcut of just directly giving the conveyor the glass while avoiding Sensor entanglements.
+		 *     That has already been tested in the previous code, and as seen, that already works according to the tests previously set up 
+		 *     Also, the same paradigm applies from the test whether there are two pieces of glass or 20 pieces of glass, so I will only do this test with two pieces of glass
+		 */		 
+		
+		/*
+		 * 1. TwoPlusGlass Test:
+		 *		a.  After initialization, check the precondition that there are no glasses in the conveyor
+		 *		b.  Add the two glasses into the conveyor
+		 *		c.  Test postconditions: There should be two glasses within the mock conveyor
+		 *		d.  Fire the animation exit sensor glass entry from the mock animation
+		 * 		e.  Test postconditions:  Exit sensor has a glass with state justEntered, Mock Conveyor Has glass
+		 * 		f.  Run sensor scheduler
+		 * 		g.  Test postconditions: Exit sensor still has glass with the Yes onSensor state, Mock Conveyor Has no glass
+		 * 		h.  Have transducer call that glass has left sensor
+		 * 		i.  Test postconditions:  Exit sensor still has glass with changed state, Mock Conveyor Has no glass
+		 * 		j.  Run scheduler
+		 * 		k.  Test postconditions:  Exit sensor has no glass, Mock Conveyor Has glass, GUI conveyor should be turned off
+		 */
+		
+		System.out.println("/****************Test: secondarySensorAgentTestTwoPlusGlass****************/");
+		
+		// Create a piece of glass to use for the test
+		Glass glass = new Glass(); // Since processing is not an issue with this test, let's just leave that field blank
+		Glass glass2 = new Glass(); // Since processing is not an issue with this test, let's just leave that field blank
+
+		
+		// Instantiate the transducer
+		Transducer transducer = new Transducer();
+		
+		// List of types for each sensor
+		List<String> typesA = new ArrayList<String>();
+		typesA.add("entry");
+		
+		// List of types for each sensor
+		List<String> typesB = new ArrayList<String>();
+		typesB.add("popUp");
+		
+		// List of types for each sensor
+		List<String> typesC = new ArrayList<String>();
+		typesC.add("exit");
+		
+		// Create the three sensor agents
+		Sensor entrySensor = new SensorAgent("entrySensor", transducer, typesA);
+		Sensor popUpSensor = new SensorAgent("popUpSensor", transducer, typesB);
+		Sensor exitSensor = new SensorAgent("exitSensor", transducer, typesC);
+		
+		// Add these sensors to a list and then put them within a conveyor family
+		List<Sensor> sensors = new ArrayList<Sensor>();
+		sensors.add(entrySensor);
+		sensors.add(popUpSensor);
+		sensors.add(exitSensor);
+		
+		// Make the Mock Conveyor
+		Conveyor mockConveyor = new MockConveyor("mockConveyor", transducer);
+		
+		// Make the Mock PopUp
+		PopUp mockPopUp = new MockPopUp("mockPopUp", transducer);
+		
+		// Make the Mock Animation for the Tests outlined in 4.
+		MockAnimation mockAnimation = new MockAnimation(transducer);
+		
+		// Instantiate the conveyorFamilies and place everything inside them
+		MockConveyorFamily mockPrevCF = new MockConveyorFamily("mockPrevCF");
+		MockConveyorFamily mockNextCF = new MockConveyorFamily("mockNextCF");
+		ConveyorFamily realCF = new ConveyorFamilyImp("realCF", mockConveyor, sensors, mockPopUp);
+		
+		// Link up the conveyor families
+		realCF.setPrevCF(mockPrevCF);
+		realCF.setNextCF(mockNextCF);
+		mockNextCF.setPrevCF(realCF);
+		
+		// Now that everything has been set up within the conveyor families, let us begin
+		
+		// Check pre-conditions:  No glass within the mock conveyor
+		assertTrue(realCF.getConveyor().getGlassSheets().size() == 0);
+		
+		// Add the two pieces of glass
+		realCF.getConveyor().msgGiveGlassToConveyor(glass);
+		realCF.getConveyor().msgGiveGlassToConveyor(glass2);
+		
+		// Check post-conditions:  Two glasses within the mock conveyor
+		assertTrue(realCF.getConveyor().getGlassSheets().size() == 2);
+		
+		/***********/
+		// Now let's complete all of the exit sensor logic and complete the test
+		/***********/
+		
+		// Check for the following preconditions:
+		assertTrue(realCF.getSensor("exit").getGlassSheets().size() == 0); // There should not be any glass within this array
+		assertTrue(realCF.getConveyor().getGlassSheets().size() == 2); // There should be glass here, two actually
+		
+		// Now send a piece of glass from the GuiPopUp sensor that was "just hit" by the glass currently on the conveyor
+		mockAnimation.fireExitSensorEnterGlass(glass);
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// Check for the following postconditions:
+		assertTrue(realCF.getSensor("exit").getGlassSheets().size() == 1); // Exit sensor should have glass
+		assertEquals(realCF.getSensor("exit").getGlassSheets().get(0).onSensor, onSensor.justEntered); // Exit sensor glass state should be justEntered
+		assertTrue(realCF.getConveyor().getGlassSheets().size() == 2); // MockConveyor should have two glasses still
+		
+		// Let's run the sensor scheduler
+		realCF.getSensor("exit").runScheduler();
+		
+		// Check for the following postConditions:
+		assertTrue(realCF.getSensor("exit").getGlassSheets().size() == 1); // Exit sensor should still have glass
+		assertEquals(realCF.getSensor("exit").getGlassSheets().get(0).onSensor, onSensor.yes); // Glass should now be in the yes state
+		assertTrue(realCF.getConveyor().getGlassSheets().size() == 1); // The Mockconveyor should only have one glass at this point
+		// the conveyor mock immediately passes off the glass to the next family as soon as the glass hits the exit sensor
+		
+		// Now process the transducer event(s) and then check that the conveyor is still on!
+		while (transducer.processNextEvent());
+		
+		// Check for the following postConditions:
+		assertTrue(realCF.getSensor("exit").getGlassSheets().size() == 1); // Entry sensor should still have glass
+		assertEquals(realCF.getSensor("exit").getGlassSheets().get(0).onSensor, onSensor.yes); // Glass should now be in the yes state
+		assertTrue(realCF.getConveyor().getGlassSheets().size() == 1); // The Mockconveyor should have glass now
+		
+		assertTrue(realCF.getConveyor().isConveyorOn() == true); // GUI conveyor should have still be on, one glass has yet to go through the conveyor
+		
+		// Now the GuiGlass has just left this sensor, so the MockAnimation will notify this sensor of the news via the transducer
+		
+		mockAnimation.fireExitSensorExitGlass(glass); // Note that the parsing to get to this point will have to be done for real in v1
+		
+		// Now process the transducer event(s), if any
+		while (transducer.processNextEvent());
+		
+		// Check for the following postconditions:
+		
+		// SensorAgent with glass should have a changed state, but the glass should still be there
+		assertTrue(realCF.getSensor("exit").getGlassSheets().size() == 1); // Entry sensor should still have glass
+		assertEquals(realCF.getSensor("exit").getGlassSheets().get(0).onSensor, onSensor.no); // Glass should now be in the no state
+		assertTrue(realCF.getConveyor().getGlassSheets().size() == 1); // Nothing should have changed within the mock conveyor
+		
+		// Let's run the sensor scheduler
+		realCF.getSensor("exit").runScheduler();
+		
+		// Check for the following postconditions:
+		assertTrue(realCF.getSensor("exit").getGlassSheets().size() == 0); // Entry sensor should not have the glass now
+		assertTrue(realCF.getConveyor().getGlassSheets().size() == 1); // Mock conveyor still has one glass.
+		
+		/*Now if the exit sensor case were to run again, it would be just like in the first test, so repitition does not seem necessary here*/
 	}
 
 }
