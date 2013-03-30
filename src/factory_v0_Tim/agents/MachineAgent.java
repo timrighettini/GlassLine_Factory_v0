@@ -5,8 +5,6 @@ import java.util.*;
 import engine.agent.Agent;
 import factory_v0_Tim.interfaces.Machine;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
-import restaurant.CookAgent;
-import restaurant.CookAgent.CallTask;
 import shared.Glass;
 import shared.enums.MachineType;
 import shared.interfaces.ConveyorFamily;
