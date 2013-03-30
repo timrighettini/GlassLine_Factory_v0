@@ -1,27 +1,23 @@
-package factory_v0_Tim.agents;
+package factory_v0_Tim.test.Mock;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import engine.agent.Agent;
-import factory_v0_Tim.interfaces.Machine;
-import factory_v0_Tim.interfaces.PopUp;
-import factory_v0_Tim.misc.ConveyorFamilyImp;
-import factory_v0_Tim.misc.MyGlassPopUp;
-import factory_v0_Tim.misc.MyGlassPopUp.processState;
 import shared.Glass;
 import shared.enums.MachineType;
 import shared.interfaces.ConveyorFamily;
 import transducer.TChannel;
 import transducer.TEvent;
 import transducer.Transducer;
+import factory_v0_Tim.agents.MachineAgent;
+import factory_v0_Tim.interfaces.Machine;
+import factory_v0_Tim.interfaces.PopUp;
+import factory_v0_Tim.misc.MyGlassPopUp;
+import factory_v0_Tim.misc.MyGlassPopUp.processState;
 
-public class PopUpAgent extends Agent implements PopUp {
-
-	// Name: PopUpAgent
-
-	// Description:  Will act as a mediator between the conveyor agent and the robot agents for getting glass to the processing machines, if necessary.
-	// Of course, this agent may not be needed because there is NO ROBOT in the animation. but I will leave it in for now.
-
+public class MockPopUp extends MockAgent implements PopUp {
+	
 	// Data:	
 	private class MachineCom { // Will hold a communication channel to a robot, allowing for the possibility to communicate to multiple robots at once
 		MachineAgent machine; // Robot reference
@@ -46,7 +42,7 @@ public class PopUpAgent extends Agent implements PopUp {
 	private ConveyorFamily cf;
 	
 	// Constructors:
-	public PopUpAgent(String name, Transducer transducer, ConveyorFamily cf, List<Machine> machines) {  
+	public MockPopUp(String name, Transducer transducer, ConveyorFamily cf, List<Machine> machines) {  
 		// Set the passed in values first
 		super(name, transducer);
 		this.cf = cf;		
@@ -74,7 +70,6 @@ public class PopUpAgent extends Agent implements PopUp {
 	public void msgGiveGlassToPopUp(Glass g) { // Get Glass from conveyor to PopUp
 		glassToBeProcessed.add(new MyGlassPopUp(g, processState.unprocessed));
 		print("Glass with ID (" + g.getId() + ") added");
-		stateChanged();
 	}
 
 	public void msgDoneProcessingGlass(Glass g) {
@@ -84,31 +79,11 @@ public class PopUpAgent extends Agent implements PopUp {
 				com.inUse = false;
 				com.glassBeingProcessed = null;
 				print("Glass with ID (" + g.getId() + ") recieved from machine");
-				stateChanged();
 				break;
 			}
 		}
 	}
-
-	//Scheduler:
-	public boolean pickAndExecuteAnAction() {
-		for (MyGlassPopUp g: glassToBeProcessed) {
-			if (g.processState == processState.unprocessed) {
-				for (MachineCom com: machineComs) {
-					if (com.inUse == false && popUpDown == true) {
-						actPassGlassToMachine(g, com); return true;
-					}
-				}
-			}
-		}
-		for (MyGlassPopUp g: glassToBeProcessed) {
-			if (g.processState == processState.doneProcessing) {
-				actPassGlassToConveyor(g); return true;
-			}
-		}
-		return false;
-	}
-
+	
 	//Actions:
 	private void actPassGlassToMachine(MyGlassPopUp g, MachineCom com) {
 		if (g.glass.getRecipe().containsKey(com.processType)) {
@@ -177,4 +152,5 @@ public class PopUpAgent extends Agent implements PopUp {
 		return popUpDown;
 	}
 
+	
 }

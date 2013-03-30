@@ -59,6 +59,7 @@ public class SensorAgent extends Agent implements Sensor {
 				g.onSensor = onSensor.no;
 				stateChanged();	
 				print("Transducer call: glass with ID (" + g.glass.getId() + ") is off of the sensor " + name);
+				break;
 			}
 		}
 	}

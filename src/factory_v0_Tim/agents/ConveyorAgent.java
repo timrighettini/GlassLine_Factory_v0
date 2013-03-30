@@ -69,6 +69,7 @@ public class ConveyorAgent extends Agent implements Conveyor {
 				glass.conveyorState = conveyorState.passCF;
 				print("Glass with ID (" + glass.glass.getId() + ") soon going to next ConveyorFamily");
 				stateChanged();
+				break;
 			}
 		}
 	}

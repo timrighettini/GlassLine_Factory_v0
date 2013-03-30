@@ -14,6 +14,7 @@ import factory_v0_Tim.misc.MyGlassConveyor;
 import factory_v0_Tim.misc.MyGlassConveyor.conveyorState;
 
 public class MockConveyor extends MockAgent implements Conveyor {
+	
 	//Data:
 	private List<MyGlassConveyor> glassSheets; // List to hold all of the glass sheets
 	private boolean positionFreeNextCF; // Will determine if a piece of glass should be passed to the next conveyor family.  This will initially be set to true.
@@ -24,7 +25,7 @@ public class MockConveyor extends MockAgent implements Conveyor {
 	public MockConveyor(String name, Transducer transducer, ConveyorFamily cf) {
 		// Set the passed in values first
 		super(name, transducer);
-		this.cf = (ConveyorFamilyImp) cf;		
+		this.cf = (ConveyorFamilyImp) cf;
 		
 		// Then set the values that need to be initialized within this class, specifically
 		glassSheets = Collections.synchronizedList(new ArrayList<MyGlassConveyor>());
@@ -62,6 +63,7 @@ public class MockConveyor extends MockAgent implements Conveyor {
 			if (glass.glass.getId() == g.getId()) {
 				glass.conveyorState = conveyorState.passCF;
 				print("Glass with ID (" + glass.glass.getId() + ") soon going to next ConveyorFamily");
+				break;
 			}
 		}
 	}
