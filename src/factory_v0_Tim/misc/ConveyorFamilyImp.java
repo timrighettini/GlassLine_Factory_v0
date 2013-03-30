@@ -21,13 +21,18 @@ public class ConveyorFamilyImp implements ConveyorFamily {
 	private String name;
 	
 	//Constructors:
-	public ConveyorFamilyImp(String name, ConveyorFamilyImp prevCF, ConveyorFamilyImp nextCF, Conveyor conveyor, List<Sensor> sensors, PopUp popUp) {
+	public ConveyorFamilyImp(String name, Conveyor conveyor, List<Sensor> sensors, PopUp popUp) {
 		this.name = name;
-		this.prevCF = prevCF;
-		this.nextCF = nextCF;
-		this.conveyor = (ConveyorAgent) conveyor;
+		this.conveyor = conveyor;
 		this.sensors = sensors;
 		this.popUp = popUp;
+		
+		// Set the CF references for these components
+		this.conveyor.setCF(this);
+		for (Sensor s: this.sensors) {
+			s.setCF(this);
+		}
+		this.popUp.setCF(this);
 	}
 
 	//Messages:
@@ -66,7 +71,7 @@ public class ConveyorFamilyImp implements ConveyorFamily {
 	}
 
 	public void setPrevCF(ConveyorFamily prevCF) {
-		this.prevCF = (ConveyorFamilyImp) prevCF;
+		this.prevCF = prevCF;
 	}
 
 	public PopUp getPopUp() {

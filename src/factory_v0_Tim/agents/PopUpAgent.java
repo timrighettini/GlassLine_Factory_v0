@@ -46,10 +46,9 @@ public class PopUpAgent extends Agent implements PopUp {
 	private ConveyorFamily cf;
 	
 	// Constructors:
-	public PopUpAgent(String name, Transducer transducer, ConveyorFamily cf, List<Machine> machines) {  
+	public PopUpAgent(String name, Transducer transducer, List<Machine> machines) {  
 		// Set the passed in values first
 		super(name, transducer);
-		this.cf = cf;		
 		
 		// Then set the values that need to be initialized within this class, specifically
 		glassToBeProcessed = Collections.synchronizedList(new ArrayList<MyGlassPopUp>());
@@ -175,6 +174,11 @@ public class PopUpAgent extends Agent implements PopUp {
 	 */
 	public boolean isPopUpDown() {
 		return popUpDown;
+	}
+
+	@Override
+	public void setCF(ConveyorFamily conveyorFamilyImp) {
+		cf = conveyorFamilyImp;		
 	}
 
 }

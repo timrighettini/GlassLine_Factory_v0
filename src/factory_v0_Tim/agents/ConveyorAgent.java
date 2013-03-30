@@ -27,10 +27,9 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	private ConveyorFamily cf;
 	
 	// Constructors:
-	public ConveyorAgent(String name, Transducer transducer, ConveyorFamily cf) {
+	public ConveyorAgent(String name, Transducer transducer) {
 		// Set the passed in values first
 		super(name, transducer);
-		this.cf = cf;		
 		
 		// Then set the values that need to be initialized within this class, specifically
 		glassSheets = Collections.synchronizedList(new ArrayList<MyGlassConveyor>());
@@ -145,5 +144,10 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	 */
 	public List<MyGlassConveyor> getGlassSheets() {
 		return glassSheets;
+	}
+
+	@Override
+	public void setCF(ConveyorFamily conveyorFamilyImp) {
+		cf = conveyorFamilyImp;		
 	}
 }

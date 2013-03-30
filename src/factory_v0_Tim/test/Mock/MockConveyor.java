@@ -22,10 +22,9 @@ public class MockConveyor extends MockAgent implements Conveyor {
 	private ConveyorFamily cf;
 	
 	// Constructors:
-	public MockConveyor(String name, Transducer transducer, ConveyorFamily cf) {
+	public MockConveyor(String name, Transducer transducer) {
 		// Set the passed in values first
 		super(name, transducer);
-		this.cf = (ConveyorFamilyImp) cf;
 		
 		// Then set the values that need to be initialized within this class, specifically
 		glassSheets = Collections.synchronizedList(new ArrayList<MyGlassConveyor>());
@@ -76,20 +75,6 @@ public class MockConveyor extends MockAgent implements Conveyor {
 	public void msgUpdateGlass(Glass g) { // This message is akin to a stub, but I wanted to match up to my current interaction diagram – I could just call msgGiveGlassToConveyor directly, but the semantics do not look as good that way
 		msgGiveGlassToConveyor(g); 
 	}
-
-	//Actions:
-	private void actPassGlassToPopUp(MyGlassConveyor g) {
-		cf.getPopUp().msgGiveGlassToPopUp(g.glass);
-		print("Glass with ID (" + g.glass.getId() + ") passed to PopUp");
-		glassSheets.remove(g);
-	}
-
-	private void actPassGlassToNextCF(MyGlassConveyor g) {
-		cf.getNextCF().msgHereIsGlass(g.glass);
-		print("Glass with ID (" + g.glass.getId() + ") passed to nextCF");
-		glassSheets.remove(g);
-		positionFreeNextCF = false;
-	}
 	
 	// Getters and Setters
 
@@ -101,6 +86,11 @@ public class MockConveyor extends MockAgent implements Conveyor {
 	@Override
 	public List<MyGlassConveyor> getGlassSheets() {
 		return glassSheets;
+	}
+
+	@Override
+	public void setCF(ConveyorFamily conveyorFamilyImp) {
+		cf = conveyorFamilyImp;		
 	}
 
 }

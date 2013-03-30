@@ -5,6 +5,7 @@ import java.util.List;
 import factory_v0_Tim.misc.MyGlassConveyor;
 
 import shared.Glass;
+import shared.interfaces.ConveyorFamily;
 
 public interface Conveyor {
 	public abstract void msgGiveGlassToConveyor(Glass glass);
@@ -15,5 +16,6 @@ public interface Conveyor {
 	
 	// Getters/Setters
 	public abstract boolean isConveyorOn();
-	public abstract List<MyGlassConveyor> getGlassSheets();	
+	public abstract List<MyGlassConveyor> getGlassSheets();
+	public abstract void setCF(ConveyorFamily conveyorFamilyImp);	
 }
