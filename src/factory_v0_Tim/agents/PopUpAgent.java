@@ -181,4 +181,9 @@ public class PopUpAgent extends Agent implements PopUp {
 		cf = conveyorFamilyImp;		
 	}
 
+	@Override
+	public void runScheduler() {
+		pickAndExecuteAnAction();		
+	}
+
 }

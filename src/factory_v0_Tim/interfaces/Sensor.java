@@ -17,4 +17,6 @@ public interface Sensor {
 	public abstract List<MyGlassSensor> getGlassSheets();
 	public abstract void setCF(ConveyorFamily conveyorFamilyImp);
 
+	// These methods will specifically be used for testing purposes -- do not have to be always be implemented
+	public abstract void runScheduler();
 }

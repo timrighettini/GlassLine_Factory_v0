@@ -150,4 +150,9 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	public void setCF(ConveyorFamily conveyorFamilyImp) {
 		cf = conveyorFamilyImp;		
 	}
+
+	@Override
+	public void runScheduler() {
+		pickAndExecuteAnAction();
+	}
 }

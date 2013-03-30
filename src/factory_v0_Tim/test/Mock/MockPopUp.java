@@ -36,7 +36,7 @@ public class MockPopUp extends MockAgent implements PopUp {
 		// Then set the values that need to be initialized within this class, specifically
 		glassToBeProcessed = Collections.synchronizedList(new ArrayList<MyGlassPopUp>());
 
-		popUpDown = false; // The popUp has to be down when the system starts...
+		popUpDown = true; // The popUp has to be down when the system starts...
 		initializeTransducerChannels();		
 	}
 	
@@ -96,5 +96,9 @@ public class MockPopUp extends MockAgent implements PopUp {
 		cf = conveyorFamilyImp;		
 	}
 
-	
+	@Override
+	public void runScheduler() {
+		// TODO Auto-generated method stub
+		
+	}	
 }

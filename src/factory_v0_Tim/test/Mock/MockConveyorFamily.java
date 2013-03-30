@@ -5,7 +5,6 @@ import java.util.List;
 import factory_v0_Tim.interfaces.Conveyor;
 import factory_v0_Tim.interfaces.PopUp;
 import factory_v0_Tim.interfaces.Sensor;
-import factory_v0_Tim.misc.ConveyorFamilyImp;
 
 import shared.Glass;
 import shared.interfaces.ConveyorFamily;
@@ -16,6 +15,8 @@ public class MockConveyorFamily implements ConveyorFamily {
 	public String name;
 	public ConveyorFamily prevCF;
 	public ConveyorFamily nextCF;
+	
+	public EventLog log = new EventLog();
 	
 	//Constructors:
 	public MockConveyorFamily(String name) {
@@ -29,6 +30,7 @@ public class MockConveyorFamily implements ConveyorFamily {
 	
 	public void msgPositionFree() {
 		System.out.println(name + ": Messaged conveyor that glass can to passed to next conveyor system.");
+		log.add(new LoggedEvent(name + ": Messaged conveyor that glass can to passed to next conveyor system."));
 	}
 	
 	public void sendGlassToNextCF() { // Hack method for testing, I will make sure to add in the glass through msgHereIsGlass before calling this method in testing

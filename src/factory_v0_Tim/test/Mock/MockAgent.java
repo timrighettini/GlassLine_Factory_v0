@@ -15,8 +15,8 @@ import engine.agent.Agent;
  * @author Sean Turner
  * 
  */
-public class MockAgent extends Agent {
-	private String name;
+public abstract class MockAgent extends Agent {
+	protected String name;
 	
 	public EventLog log = new EventLog(); // Will use this in my MockAgents 
 
@@ -39,9 +39,6 @@ public class MockAgent extends Agent {
 	}
 
 	@Override
-	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		// TODO Auto-generated method stub
-		
-	}
+	public abstract void eventFired(TChannel channel, TEvent event, Object[] args);
 
 }
