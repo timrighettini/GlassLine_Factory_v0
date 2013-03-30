@@ -32,7 +32,7 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	private List<MyGlassConveyor> glassSheets; // List to hold all of the glass sheets
 	private boolean positionFreeNextCF; // Will determine if a piece of glass should be passed to the next conveyor family.  This will initially be set to true.
 	private boolean conveyorOn;
-	private ConveyorFamilyImp cf;
+	private ConveyorFamily cf;
 	
 	// Constructors:
 	public ConveyorAgent(String name, Transducer transducer, ConveyorFamily cf) {

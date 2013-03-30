@@ -55,7 +55,7 @@ public class PopUpAgent extends Agent implements PopUp {
 	// Positional variable for whether the Pop-Up in the GUI is up or down, and it will be changed through the transducer and checked within one of the scheduler rules
 	private boolean popUpDown; // Is this value is true, then the associated popUp is down (will be changed through the appropriate transducer eventFired(args[]) function.
 	
-	private ConveyorFamilyImp cf;
+	private ConveyorFamily cf;
 	
 	// Constructors:
 	public PopUpAgent(String name, Transducer transducer, ConveyorFamily cf, List<Machine> machines) {  
@@ -109,7 +109,7 @@ public class PopUpAgent extends Agent implements PopUp {
 			if (g.processState == processState.unprocessed) {
 				for (MachineCom com: machineComs) {
 					if (com.inUse == false && popUpDown == true) {
-						actPassGlassToRobot(g, com); return true;
+						actPassGlassToMachine(g, com); return true;
 					}
 				}
 			}
@@ -123,9 +123,10 @@ public class PopUpAgent extends Agent implements PopUp {
 	}
 
 	//Actions:
-	private void actPassGlassToRobot(MyGlassPopUp g, MachineCom com) {
+	private void actPassGlassToMachine(MyGlassPopUp g, MachineCom com) {
 		if (g.glass.getRecipe().containsKey(com.processType)) {
 			com.machine.msgProcessGlass(g.glass);
+			transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_UP, null); // Make sure to move the GUI popUp up
 			print("Glass with ID (" + g.glass.getId() + ") passed to Machine " + com.machine.getName() + "for processing");
 			com.glassBeingProcessed = g;
 			com.inUse = true;
@@ -140,6 +141,10 @@ public class PopUpAgent extends Agent implements PopUp {
 
 	private void actPassGlassToConveyor(MyGlassPopUp g) {
 		cf.getConveyor().msgUpdateGlass(g.glass);
+		transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_DOWN, null); // Make sure to move the GUI popUp down
+		if (!cf.getConveyor().isConveyorOn()) { // Make sure that the conveyor is also turned on if it is off
+			transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_DOWN, null);
+		}
 		print("Glass with ID (" + g.glass.getId() + ") passed to conveyor");
 		glassToBeProcessed.remove(g);
 	}

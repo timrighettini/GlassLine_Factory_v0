@@ -35,7 +35,7 @@ public class SensorAgent extends Agent implements Sensor {
 
 	private List<String> type; // Will hold the type of sensor this is, and it may be of more than one type
 	private List<MyGlassSensor> glassSheets; // Will hold all glass references
-	private ConveyorFamilyImp cf; // Reference to the current conveyor family
+	private ConveyorFamily cf; // Reference to the current conveyor family
 	
 	//Constructors:
 	public SensorAgent(String name, Transducer transducer, List<String> type, ConveyorFamily cf) {
