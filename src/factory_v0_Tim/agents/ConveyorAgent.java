@@ -88,11 +88,16 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	public boolean pickAndExecuteAnAction() {
 		for (MyGlassConveyor g: glassSheets) {
 			if (g.conveyorState == conveyorState.passPopUp && cf.getPopUp().getGlassToBeProcessed().isEmpty() == true) {
-				if (cf.getPopUp().getFreeChannels() > 0) {						
+				if (
+					cf.getPopUp().getFreeChannels() > 0
+					||
+					!cf.getPopUp().doesGlassNeedProcessing(g.glass)
+					
+				) {						
 					// This rule will only work when:
 					// 1. the glassSheet is supposed to go to the PopUp, 
 					// 2. when there is nothing on the pop-up, and
-					// 3. when there is a available machine to process the glass
+					// 3. when there is a available machine to process the glass OR the glass just needs to pass through WITHOUT processing, even if both machines are full
 					actPassGlassToPopUp(g); return true;
 				}	
 			}

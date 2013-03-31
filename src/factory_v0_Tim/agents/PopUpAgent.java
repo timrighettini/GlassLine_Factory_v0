@@ -186,4 +186,13 @@ public class PopUpAgent extends Agent implements PopUp {
 		pickAndExecuteAnAction();		
 	}
 
+	@Override
+	public boolean doesGlassNeedProcessing(Glass glass) {
+		if (glass.getRecipe().containsKey(machineComs.get(0).processType)) { // Both machines on every offline process do the same process
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 }

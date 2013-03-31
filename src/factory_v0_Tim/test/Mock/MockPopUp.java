@@ -101,7 +101,7 @@ public class MockPopUp extends MockAgent implements PopUp {
 	@Override
 	public int getFreeChannels() {
 		// TODO Auto-generated method stub
-		return 1;
+		return 2 - glassToBeProcessed.size();
 	}
 
 	@Override
@@ -113,5 +113,15 @@ public class MockPopUp extends MockAgent implements PopUp {
 	public void runScheduler() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public boolean doesGlassNeedProcessing(Glass glass) {
+		if (getFreeChannels() > 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}	
 }
