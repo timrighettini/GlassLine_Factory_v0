@@ -23,8 +23,8 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	//Data:
 	private List<MyGlassConveyor> glassSheets; // List to hold all of the glass sheets
 	private boolean positionFreeNextCF; // Will determine if a piece of glass should be passed to the next conveyor family.  This will initially be set to true.
-	private boolean conveyorOn;
-	private ConveyorFamily cf;
+	private boolean conveyorOn; // Is the Gui conveyor on?
+	private ConveyorFamily cf; // Reference to the current conveyor family
 	
 	// Constructors:
 	public ConveyorAgent(String name, Transducer transducer) {
@@ -45,13 +45,13 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	}
 
 	//Messages:
-	public void msgGiveGlassToConveyor(Glass g) {
+	public void msgGiveGlassToConveyor(Glass g) { // Add glass to the conveyor
 		glassSheets.add(new MyGlassConveyor(g, conveyorState.onConveyor)); // conveyorState will always initializes to onConveyor
 		print("Glass with ID (" + g.getId() + ") added to conveyor");
 		stateChanged();
 	}
 	
-	public void msgGiveGlassToPopUp(Glass g) {
+	public void msgGiveGlassToPopUp(Glass g) { // Update the state of a piece of glass to be passed to the popUp
 		synchronized(glassSheets) {
 			for (MyGlassConveyor glass: glassSheets) {
 				if (glass.glass.getId() == g.getId()) {
@@ -64,7 +64,7 @@ public class ConveyorAgent extends Agent implements Conveyor {
 		}
 	}
 
-	public void msgPassOffGlass(Glass g) {
+	public void msgPassOffGlass(Glass g) { // Update glass to state where it will be passed off to the next conveyor family
 		synchronized(glassSheets) {
 			for (MyGlassConveyor glass: glassSheets) {
 				if (glass.glass.getId() == g.getId()) {
@@ -77,7 +77,7 @@ public class ConveyorAgent extends Agent implements Conveyor {
 		}
 	}
 
-	public void msgPositionFree() {
+	public void msgPositionFree() { // Allow this conveyor to pass a piece of glass to the next conveyor family
 		positionFreeNextCF = true;
 		print("Next conveyor is available for a piece of glass.");
 		stateChanged();
@@ -118,6 +118,9 @@ public class ConveyorAgent extends Agent implements Conveyor {
 		synchronized(glassSheets) {
 			for (MyGlassConveyor g: glassSheets) {
 				if (g.conveyorState == conveyorState.passCF && positionFreeNextCF == true) {
+					// Pass glass if:
+					// 1.  Glass is supposed to be passed
+					// 2.  If next conveyorFamily is ready to take it
 					glass = g;
 					break;
 				}
@@ -131,13 +134,13 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	}
 	
 	//Actions:
-	private void actPassGlassToPopUp(MyGlassConveyor g) {
+	private void actPassGlassToPopUp(MyGlassConveyor g) { // Will pass the glass from the conveyor to the popUp
 		cf.getPopUp().msgGiveGlassToPopUp(g.glass);
 		print("Glass with ID (" + g.glass.getId() + ") passed to PopUp");
 		glassSheets.remove(g);
 	}
 
-	private void actPassGlassToNextCF(MyGlassConveyor g) {
+	private void actPassGlassToNextCF(MyGlassConveyor g) { // Will pass glass from the conveyor to the next conveyor family
 		cf.getNextCF().msgHereIsGlass(g.glass);
 		print("Glass with ID (" + g.glass.getId() + ") passed to nextCF");
 		glassSheets.remove(g);
@@ -156,6 +159,8 @@ public class ConveyorAgent extends Agent implements Conveyor {
 		}
 	}
 
+	// Getters and setters
+	
 	/**
 	 * @return the conveyorOn
 	 */

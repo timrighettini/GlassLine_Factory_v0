@@ -52,7 +52,7 @@ public class SensorAgent extends Agent implements Sensor {
 
 	// The following messages will be special to transducer events, and will be called after parsing arguments in the EventFired(args[]) function.
 
-	public void msgGlassOffSensor(Glass glass) {
+	public void msgGlassOffSensor(Glass glass) { // If GuiGlass just went off of a sensor, then find the glass reference related to it and then begin to remove it from the sensor agent
 		synchronized(glassSheets) {
 			for (MyGlassSensor g: glassSheets) {
 				if (g.glass.getId() == glass.getId()) {
@@ -65,7 +65,7 @@ public class SensorAgent extends Agent implements Sensor {
 		}
 	}
 
-	public void msgHereIsGlassTransducer(Glass glass, String strLocation) {
+	public void msgHereIsGlassTransducer(Glass glass, String strLocation) { // Transducer will pass down a glass reference to a sensorAgent when a GuiGlass just lands to a GuiSensor
 		location l = location.entry;
 		if (strLocation.equals("popUp")) {
 			l = location.popup;
@@ -87,7 +87,7 @@ public class SensorAgent extends Agent implements Sensor {
 	//Scheduler:
 	@Override
 	public boolean pickAndExecuteAnAction() {		
-		MyGlassSensor glass = null;
+		MyGlassSensor glass = null; // Use null variable for determining is value is found from synchronized loop
 		
 		synchronized(glassSheets) {
 			for (MyGlassSensor g: glassSheets) {
@@ -147,7 +147,7 @@ public class SensorAgent extends Agent implements Sensor {
 
 	private void actRemoveGlass(MyGlassSensor g) {
 		glassSheets.remove(g);
-		turnOnOffConveyor();
+		turnOnOffConveyor(); // Remember to turn the conveyor on or off based upon the conditions specified
 		if (g.location == location.entry && cf.getPrevCF() != null) { // Tell the previous conveyor family that the sensor currently has nothing on it
 			cf.getPrevCF().msgPositionFree();
 			print("Glass with ID (" + g.glass.getId() + ") removed from sensor");
@@ -221,6 +221,8 @@ public class SensorAgent extends Agent implements Sensor {
 			}
 		}
 	}
+	
+	// Getters and setters and other methods
 	
 	public List<String> getType() {
 		return type;

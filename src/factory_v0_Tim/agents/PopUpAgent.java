@@ -32,18 +32,18 @@ public class PopUpAgent extends Agent implements PopUp {
 		public MachineCom(Machine machine) {
 			this.machine = machine;
 			this.inUse = false; // At start, this channel is obviously not being used, so it has to be false
-			this.processType = machine.getProcessType();
+			this.processType = machine.getProcessType(); // nice reference for the process that this machine uses
 			this.glassBeingProcessed = null; // Currently, there is no glass being processed within this channel
 		}
 	}
 
 	private List<MyGlassPopUp> glassToBeProcessed; // This name will be abbreviated as glassToBeProcessed in many functions to save on space and complexity
-	private List<MachineCom> machineComs; 
+	private List<MachineCom> machineComs; // Channels for communicating with the machines, since there will most likely be two per offline process
 
 	// Positional variable for whether the Pop-Up in the GUI is up or down, and it will be changed through the transducer and checked within one of the scheduler rules
 	private boolean popUpDown; // Is this value is true, then the associated popUp is down (will be changed through the appropriate transducer eventFired(args[]) function.
 	
-	private ConveyorFamily cf;
+	private ConveyorFamily cf; // Reference to the current conveyor family
 	
 	// Constructors:
 	public PopUpAgent(String name, Transducer transducer, List<Machine> machines) {  
@@ -76,7 +76,7 @@ public class PopUpAgent extends Agent implements PopUp {
 		stateChanged();
 	}
 
-	public void msgDoneProcessingGlass(Glass g) {
+	public void msgDoneProcessingGlass(Glass g) { // Adds glass back from a machine and then resets the machine channel to be free
 		glassToBeProcessed.add(new MyGlassPopUp(g, processState.doneProcessing));
 		synchronized (machineComs) {
 			for (MachineCom com: machineComs) {
@@ -95,15 +95,16 @@ public class PopUpAgent extends Agent implements PopUp {
 
 	//Scheduler:
 	public boolean pickAndExecuteAnAction() {
+		// Use null variables for determining is value is found from synchronized loop
 		MyGlassPopUp glass = null;
 		MachineCom machCom = null;
 		
 		synchronized(glassToBeProcessed) {
 			for (MyGlassPopUp g: glassToBeProcessed) {
-				if (g.processState == processState.unprocessed) {
+				if (g.processState == processState.unprocessed) { // If glass needs to be processed
 					synchronized(machineComs) {
 						for (MachineCom com: machineComs) {
-							if ((com.inUse == false && popUpDown == true)) {
+							if ((com.inUse == false && popUpDown == true)) { // If there is an available machine and the popUp is down
 								glass = g;
 								machCom = com;
 								break;
@@ -111,7 +112,7 @@ public class PopUpAgent extends Agent implements PopUp {
 						}
 					}
 					if (glass != null && machCom != null) {break;} // Make sure to break out of the other loop as well
-					if (g.glass.getRecipe().containsKey(machineComs.get(0).processType) && g.glass.getRecipe().containsValue(false)) {
+					if (g.glass.getRecipe().containsKey(machineComs.get(0).processType) && g.glass.getRecipe().containsValue(false)) { // If glass does not need to be processed
 						// Since both machineComs point to the same machine type, this code will fine
 						glass = g;
 						break;
@@ -130,7 +131,7 @@ public class PopUpAgent extends Agent implements PopUp {
 		
 		synchronized(glassToBeProcessed) {
 			for (MyGlassPopUp g: glassToBeProcessed) {
-				if (g.processState == processState.doneProcessing) {
+				if (g.processState == processState.doneProcessing) { // If glass is done processing and needs to be sent back to conveyor
 					glass = g;
 					break;
 				}
@@ -183,6 +184,8 @@ public class PopUpAgent extends Agent implements PopUp {
 		
 	}
 	
+	// Getters and Setters
+	
 	public int getFreeChannels() {
 		int freeChannels = 0;
 		synchronized(machineComs) {	
@@ -225,7 +228,7 @@ public class PopUpAgent extends Agent implements PopUp {
 	}
 
 	@Override
-	public boolean doesGlassNeedProcessing(Glass glass) {
+	public boolean doesGlassNeedProcessing(Glass glass) { // Method invoked by the conveyor for a special case of sending glass down the popUp in the line
 		if (glass.getRecipe().containsKey(machineComs.get(0).processType) && glass.getRecipe().containsValue(true)) { // Both machines on every offline process do the same process
 			return true;
 		}
