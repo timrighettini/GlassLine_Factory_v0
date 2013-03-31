@@ -17,8 +17,8 @@ import factory_v0_Tim.misc.MyGlassConveyor.conveyorState;
 public class MockConveyor extends MockAgent implements Conveyor {
 	
 	//Data:
-	private List<MyGlassConveyor> glassSheets; // List to hold all of the glass sheets
-	private boolean positionFreeNextCF; // Will determine if a piece of glass should be passed to the next conveyor family.  This will initially be set to true.
+	public List<MyGlassConveyor> glassSheets; // List to hold all of the glass sheets
+	public boolean positionFreeNextCF; // Will determine if a piece of glass should be passed to the next conveyor family.  This will initially be set to true.
 	public boolean conveyorOn;
 	private ConveyorFamily cf;
 	
@@ -118,5 +118,4 @@ public class MockConveyor extends MockAgent implements Conveyor {
 			conveyorOn = false;
 		}		
 	}
-
 }

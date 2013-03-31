@@ -17,7 +17,9 @@ import factory_v0_Tim.agents.SensorAgent;
 import factory_v0_Tim.interfaces.Machine;
 import factory_v0_Tim.interfaces.Sensor;
 import factory_v0_Tim.misc.ConveyorFamilyImp;
+import factory_v0_Tim.misc.MyGlassPopUp.processState;
 import factory_v0_Tim.test.Mock.MockAnimation;
+import factory_v0_Tim.test.Mock.MockAnimation.PopUpHeightState;
 import factory_v0_Tim.test.Mock.MockConveyor;
 import factory_v0_Tim.test.Mock.MockConveyorFamily;
 import factory_v0_Tim.test.Mock.MockMachine;
@@ -41,7 +43,7 @@ public class PopUpTestCases {
 		 *  4.  Run scheduler
 		 *  5.  Check postconditions: PopUp should not have glass, MockMachine 0 has glass && MM 1 does not, MockConveyor Has no glass, popUp should be down (it should go up, be passed to machine, and then go back down)
 		 *  6.  Pass glass from MockMachine to popUp after "finishing" processing
-		 *  7.  Check postconditions: PopUp should have glass with state doneProcessing, MockMachines have no glass, MockConveyor Has no glass, popUp should be up
+		 *  7.  Check postconditions: PopUp should have glass with state doneProcessing and removed recipe item, MockMachines have no glass, MockConveyor Has no glass, popUp should be up
 		 *  8.  Run scheduler
 		 *  9.  Check postconditions: PopUp should not have glass, MockMachines have no glass, MockConveyor Has glass, popUp should be down
 		 * */
@@ -49,7 +51,13 @@ public class PopUpTestCases {
 		System.out.println("/****************Test: testConveyorOneGlass****************/");
 		
 		// Create a piece of glass to use for the test
-		Glass glass = new Glass(); // Since processing is not an issue with this test, let's just leave that field blank
+		
+		// Make the list of processes
+		
+		List<MachineType> processTypes = new ArrayList<MachineType>();
+		processTypes.add(MachineType.CROSS_SEAMER);
+		
+		Glass glass = new Glass(processTypes); // Since processing is not an issue with this test, let's just leave that field blank
 		
 		// Instantiate the transducer
 		Transducer transducer = new Transducer();
@@ -78,7 +86,7 @@ public class PopUpTestCases {
 		sensors.add(exitSensor);
 		
 		// Make the Mock Conveyor
-		MockConveyor conveyor = new MockConveyor("Conveyor", transducer);
+		MockConveyor mockConveyor = new MockConveyor("Conveyor", transducer);
 		
 		// Make the two machines for the PopUp
 		MockMachine mockMachine0 = new MockMachine("mockMachine0", transducer, MachineType.CROSS_SEAMER, 0);
@@ -98,7 +106,7 @@ public class PopUpTestCases {
 		// Instantiate the conveyorFamilies and place everything inside them
 		MockConveyorFamily mockPrevCF = new MockConveyorFamily("mockPrevCF");
 		MockConveyorFamily mockNextCF = new MockConveyorFamily("mockNextCF");
-		ConveyorFamily realCF = new ConveyorFamilyImp("realCF", conveyor, sensors, popUp);
+		ConveyorFamily realCF = new ConveyorFamilyImp("realCF", mockConveyor, sensors, popUp);
 		
 		// Link up the conveyor families
 		realCF.setPrevCF(mockPrevCF);
@@ -113,25 +121,72 @@ public class PopUpTestCases {
 		// Now that the conveyor families are actually set up, let's begin
 		
 		// Check the following preconditions:
-		// There should be no glass within the popUp
-		// None of the machines should have glass
-		// The conveyor should not have glass
-		// popUp should be down
+		assertTrue(popUp.getGlassToBeProcessed().size() == 0); // There should be no glass within the popUp
+		assertTrue(mockMachine0.getGlassToBeProcessed().size() == 0); // None of the machines should have glass
+		assertTrue(mockMachine1.getGlassToBeProcessed().size() == 0); // None of the machines should have glass
+		assertTrue(mockConveyor.glassSheets.size() == 0); // The conveyor should not have glass
+		assertTrue(mockAnimation.popUpHeight == PopUpHeightState.DOWN); // popUp should be down
 		
+		// Pass in one piece of glass to the popUp that requires processing
+		popUp.msgGiveGlassToPopUp(glass);
 		
+		// Check postconditions
+		assertTrue(popUp.getGlassToBeProcessed().size() == 1); // There should be glass within the popUp
+		assertTrue(popUp.getGlassToBeProcessed().get(0).processState == processState.unprocessed); // There should be glass within the popUp
+		assertTrue(mockMachine0.getGlassToBeProcessed().size() == 0); // None of the machines should have glass
+		assertTrue(mockMachine1.getGlassToBeProcessed().size() == 0); // None of the machines should have glass
+		assertTrue(mockConveyor.glassSheets.size() == 0); // The conveyor should not have glass
+		assertTrue(mockAnimation.popUpHeight == PopUpHeightState.DOWN); // popUp should be down
 		
-		/*
-		 * Outline:
-		 * 	1.  Test the following preconditions:  PopUp has no glass, MockMachine have no glass, MockConveyor Has no glass, popUp should be down
-		 *  2.  Pass in glass to the popUp
-		 *  3.  Check Postconditions: PopUp should have glass with state unprocessed, MockMachines have no glass, MockConveyor Has no glass, popUp should be down
-		 *  4.  Run scheduler
-		 *  5.  Check postconditions: PopUp should not have glass, MockMachine 0 has glass && MM 1 does not, MockConveyor Has no glass, popUp should be down (it should go up, be passed to machine, and then go back down)
-		 *  6.  Pass glass from MockMachine to popUp after "finishing" processing
-		 *  7.  Check postconditions: PopUp should have glass with state doneProcessing, MockMachines have no glass, MockConveyor Has no glass, popUp should be up
-		 *  8.  Run scheduler
-		 *  9.  Check postconditions: PopUp should not have glass, MockMachines have no glass, MockConveyor Has glass, popUp should be down
-		 * */
+		// Run the scheduler
+		popUp.pickAndExecuteAnAction();
+		
+		// Process the transducer events
+		while(transducer.processNextEvent());
+		
+		// Check postconditions
+		assertTrue(popUp.getGlassToBeProcessed().size() == 0); // There should not be glass within the popUp		
+		assertTrue(mockMachine0.getGlassToBeProcessed().size() == 1); // Machine 0 should have the glass
+		assertTrue(mockMachine0.log.containsString("Glass with ID (" + glass.getId() + ") recieved"));
+		assertTrue(mockMachine1.getGlassToBeProcessed().size() == 0); // Machine 1 should not have glass
+		assertTrue(mockConveyor.glassSheets.size() == 0); // The conveyor should not have glass
+		assertTrue(mockAnimation.popUpHeight == PopUpHeightState.DOWN); // popUp should still be down -- Look in the print I/O for this test to actually see that the popUp moves up then down to get the glass onto the machine
+		
+		// Have the MockMachine pass the glass after it is done processing
+		mockAnimation.glassDoneProcessing(glass);
+		
+		// Process transducer events
+		while(transducer.processNextEvent());
+
+		// Check postconditions
+		assertTrue(popUp.getGlassToBeProcessed().size() == 1); // PopUp should have glass now 
+		assertTrue(popUp.getGlassToBeProcessed().get(0).processState == processState.doneProcessing); // PopUp glass should have donePrcessing state
+		assertTrue(popUp.getGlassToBeProcessed().get(0).glass.getRecipe().containsKey(MachineType.CROSS_SEAMER) 
+				&&
+				   popUp.getGlassToBeProcessed().get(0).glass.getRecipe().containsValue(false));// PopUp glass should have recipe item "removed"
+		// MockMachines should have no glass
+		assertTrue(mockMachine0.getGlassToBeProcessed().size() == 0); // None of the machines should have glass
+		assertTrue(mockMachine1.getGlassToBeProcessed().size() == 0); // None of the machines should have glass
+		// MockConveyor should have no glass
+		assertTrue(mockConveyor.glassSheets.size() == 0); // The conveyor should not have glass		
+		assertTrue(mockAnimation.popUpHeight == PopUpHeightState.UP); // Pop Up should be Up
+		
+		// Run scheduler
+		popUp.pickAndExecuteAnAction();
+		
+		// Process transducer events
+		while(transducer.processNextEvent());
+		
+		// Check postconditions
+		assertTrue(popUp.getGlassToBeProcessed().size() == 0); // Pop up should not have glass
+		// MockMachines should have no glass
+		assertTrue(mockMachine0.getGlassToBeProcessed().size() == 0); // None of the machines should have glass
+		assertTrue(mockMachine1.getGlassToBeProcessed().size() == 0); // None of the machines should have glass
+		// MockConveyor should have glass
+		assertTrue(mockConveyor.glassSheets.size() == 1); // The conveyor should not have glass		
+		assertTrue(mockAnimation.popUpHeight == PopUpHeightState.DOWN); // Pop Up should be down
+		
+		// From this point, the popUp is how it was at the beginning of the test
 	}
 	
 	@Test

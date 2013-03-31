@@ -34,6 +34,7 @@ public class MockMachine extends MockAgent implements Machine {
 	public MockMachine(String name, Transducer transducer, MachineType processType, int machineChannel) { // Will exclude the robot unless it is needed
 		// Initialize the variables based upon the constructor parameters first
 		super(name, transducer);
+		this.name = name;
 		this.processType = processType;
 		this.machineChannel = machineChannel;
 		
@@ -64,21 +65,15 @@ public class MockMachine extends MockAgent implements Machine {
 				transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_UP, null); // Make sure to move the GUI popUp up
 				print("Glass with ID (" + g.getId() + ") done being processed");
 				log.add(new LoggedEvent("Glass with ID (" + g.getId() + ") done being processed"));
+				PassGlassToCF(glass); // Hack, send the glass back to the popUp here				
 				break;
 			}
 		}
 	}
 	
 	//Actions:
-	public void ProcessGlass(MyGlassMachine g) {
-		//transducer.sendProcessGlassMessage(); // Stub for when the transducer is set up to send a processing message to the animation
-		g.processState = processState.processing;
-		print("Glass with ID (" + g.glass.getId() + ") currently processing...");
-		log.add(new LoggedEvent("Glass with ID (" + g.glass.getId() + ") currently processing..."));
-	}
-
 	public void PassGlassToCF(MyGlassMachine g) {
-		g.glass.getRecipe().remove(this.processType); // Done with process, does not need to be in recipe anymore
+		g.glass.getRecipe().put(this.processType, false); // Done with process, bit changed to false
 		print("Glass with ID (" + g.glass.getId() + ") passed to PopUp");
 		log.add(new LoggedEvent("Glass with ID (" + g.glass.getId() + ") passed to PopUp"));
 		//robot.msgDoneProcessingGlass(g.glass);
@@ -89,9 +84,9 @@ public class MockMachine extends MockAgent implements Machine {
 	//Other Methods:
 	@Override
 	public void eventFired(TChannel channel, TEvent event, Object[] args) {
-		if (args[0] instanceof Glass) { // There should be a glass reference from the GUI glass inside this array
+		if (event == TEvent.WORKSTATION_GUI_ACTION_FINISHED && args[0] instanceof Glass) { // There should be a glass reference from the GUI glass inside this array
 			Glass glass = (Glass) args[0];
-			msgDoneProcessingGlass(glass);						
+			msgDoneProcessingGlass(glass);
 		}			
 	}
 
@@ -103,5 +98,9 @@ public class MockMachine extends MockAgent implements Machine {
 	@Override
 	public void setCF(ConveyorFamily cf) {
 		this.cf = cf;		
+	}
+	
+	public List<MyGlassMachine> getGlassToBeProcessed() {
+		return glassToBeProcessed;
 	}
 }

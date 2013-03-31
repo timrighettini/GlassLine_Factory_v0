@@ -114,4 +114,13 @@ public class MockAnimation implements TReceiver { // This will hold the mock ani
 		System.out.println("MockAnimation: sent message to exit sensor -- pressed");
 	}
 	
+	public void glassDoneProcessing(Glass g) {
+		Object[] args = new Object[1];
+		
+		args[0] = g;		
+		
+		transducer.fireEvent(TChannel.CROSS_SEAMER, TEvent.WORKSTATION_GUI_ACTION_FINISHED, args);
+		System.out.println("MockAnimation: sent message to machine -- animation done");
+	}
+	
 }

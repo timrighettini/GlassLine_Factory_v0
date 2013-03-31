@@ -59,7 +59,7 @@ public class PopUpAgent extends Agent implements PopUp {
 			machineComs.add(new MachineCom(m));
 		}
 		
-		popUpDown = false; // The popUp has to be down when the system starts...
+		popUpDown = true; // The popUp has to be down when the system starts...
 		initializeTransducerChannels();		
 	}
 	
@@ -111,9 +111,9 @@ public class PopUpAgent extends Agent implements PopUp {
 	//Actions:
 	private void actPassGlassToMachine(MyGlassPopUp g, MachineCom com) {
 		if (g.glass.getRecipe().containsKey(com.processType) && g.glass.getRecipe().containsValue(true)) {
-			com.machine.msgProcessGlass(g.glass);
 			transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_UP, null); // Make sure to move the GUI popUp up
-			print("Glass with ID (" + g.glass.getId() + ") passed to Machine " + com.processType + "for processing");
+			print("Glass with ID (" + g.glass.getId() + ") passed to Machine " + com.processType + " for processing");
+			com.machine.msgProcessGlass(g.glass);
 			com.glassBeingProcessed = g;
 			com.inUse = true;
 			glassToBeProcessed.remove(g);	
@@ -129,7 +129,7 @@ public class PopUpAgent extends Agent implements PopUp {
 		cf.getConveyor().msgUpdateGlass(g.glass);
 		transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_DOWN, null); // Make sure to move the GUI popUp down
 		if (!cf.getConveyor().isConveyorOn()) { // Make sure that the conveyor is also turned on if it is off
-			transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_DOWN, null);
+			transducer.fireEvent(TChannel.ALL_GUI, TEvent.CONVEYOR_DO_START, null);
 		}
 		print("Glass with ID (" + g.glass.getId() + ") passed to conveyor");
 		glassToBeProcessed.remove(g);
