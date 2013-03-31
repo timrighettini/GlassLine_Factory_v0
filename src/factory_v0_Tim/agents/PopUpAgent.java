@@ -79,12 +79,14 @@ public class PopUpAgent extends Agent implements PopUp {
 	public void msgDoneProcessingGlass(Glass g) {
 		glassToBeProcessed.add(new MyGlassPopUp(g, processState.doneProcessing));
 		for (MachineCom com: machineComs) {
-			if (com.glassBeingProcessed.glass.getId() == g.getId()) {
-				com.inUse = false;
-				com.glassBeingProcessed = null;
-				print("Glass with ID (" + g.getId() + ") recieved from machine");
-				stateChanged();
-				break;
+			if (com.glassBeingProcessed != null) {
+				if (com.glassBeingProcessed.glass.getId() == g.getId()) {
+					com.inUse = false;
+					com.glassBeingProcessed = null;
+					print("Glass with ID (" + g.getId() + ") recieved from machine");
+					stateChanged();
+					break;
+				}
 			}
 		}
 	}
