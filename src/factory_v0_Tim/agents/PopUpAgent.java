@@ -78,14 +78,16 @@ public class PopUpAgent extends Agent implements PopUp {
 
 	public void msgDoneProcessingGlass(Glass g) {
 		glassToBeProcessed.add(new MyGlassPopUp(g, processState.doneProcessing));
-		for (MachineCom com: machineComs) {
-			if (com.glassBeingProcessed != null) {
-				if (com.glassBeingProcessed.glass.getId() == g.getId()) {
-					com.inUse = false;
-					com.glassBeingProcessed = null;
-					print("Glass with ID (" + g.getId() + ") recieved from machine");
-					stateChanged();
-					break;
+		synchronized (machineComs) {
+			for (MachineCom com: machineComs) {
+				if (com.glassBeingProcessed != null) {
+					if (com.glassBeingProcessed.glass.getId() == g.getId()) {
+						com.inUse = false;
+						com.glassBeingProcessed = null;
+						print("Glass with ID (" + g.getId() + ") recieved from machine");
+						stateChanged();
+						break;
+					}
 				}
 			}
 		}
@@ -93,24 +95,51 @@ public class PopUpAgent extends Agent implements PopUp {
 
 	//Scheduler:
 	public boolean pickAndExecuteAnAction() {
-		for (MyGlassPopUp g: glassToBeProcessed) {
-			if (g.processState == processState.unprocessed) {
-				for (MachineCom com: machineComs) {
-					if ((com.inUse == false && popUpDown == true)) {
-						actPassGlassToMachine(g, com); return true;
+		MyGlassPopUp glass = null;
+		MachineCom machCom = null;
+		
+		synchronized(glassToBeProcessed) {
+			for (MyGlassPopUp g: glassToBeProcessed) {
+				if (g.processState == processState.unprocessed) {
+					synchronized(machineComs) {
+						for (MachineCom com: machineComs) {
+							if ((com.inUse == false && popUpDown == true)) {
+								glass = g;
+								machCom = com;
+								break;
+							}
+						}
+					}
+					if (glass != null && machCom != null) {break;} // Make sure to break out of the other loop as well
+					if (g.glass.getRecipe().containsKey(machineComs.get(0).processType) && g.glass.getRecipe().containsValue(false)) {
+						// Since both machineComs point to the same machine type, this code will fine
+						glass = g;
+						break;
 					}
 				}
-				if (g.glass.getRecipe().containsKey(machineComs.get(0).processType) && g.glass.getRecipe().containsValue(false)) {
-					// Since both machineComs point to the same machine type, this code will fine
-					actPassGlassToConveyor(g); return true;
+			}
+		}
+		if (glass != null) {
+			if (machCom != null) {
+				actPassGlassToMachine(glass, machCom); return true;
+			}
+			else {
+				actPassGlassToConveyor(glass); return true;
+			}
+		}
+		
+		synchronized(glassToBeProcessed) {
+			for (MyGlassPopUp g: glassToBeProcessed) {
+				if (g.processState == processState.doneProcessing) {
+					glass = g;
+					break;
 				}
 			}
 		}
-		for (MyGlassPopUp g: glassToBeProcessed) {
-			if (g.processState == processState.doneProcessing) {
-				actPassGlassToConveyor(g); return true;
-			}
+		if (glass != null) {
+			actPassGlassToConveyor(glass); return true;
 		}
+		
 		return false;
 	}
 
@@ -156,9 +185,12 @@ public class PopUpAgent extends Agent implements PopUp {
 	
 	public int getFreeChannels() {
 		int freeChannels = 0;
-		for (MachineCom com: machineComs) {
-			if (com.inUse == false)
-				freeChannels++;
+		synchronized(machineComs) {	
+			for (MachineCom com: machineComs) {
+				if (com.inUse == false)
+					
+					freeChannels++;
+			}
 		}
 		
 		// Make sure to augment the free channels number by the amount of glasses that are currently within the popUp, so that two glasses do not come up when there shoulkd only be one

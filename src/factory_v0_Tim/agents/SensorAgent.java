@@ -53,12 +53,14 @@ public class SensorAgent extends Agent implements Sensor {
 	// The following messages will be special to transducer events, and will be called after parsing arguments in the EventFired(args[]) function.
 
 	public void msgGlassOffSensor(Glass glass) {
-		for (MyGlassSensor g: glassSheets) {
-			if (g.glass.getId() == glass.getId()) {
-				g.onSensor = onSensor.no;
-				stateChanged();	
-				print("Transducer call: glass with ID (" + g.glass.getId() + ") is off of the sensor");
-				break;
+		synchronized(glassSheets) {
+			for (MyGlassSensor g: glassSheets) {
+				if (g.glass.getId() == glass.getId()) {
+					g.onSensor = onSensor.no;
+					stateChanged();	
+					print("Transducer call: glass with ID (" + g.glass.getId() + ") is off of the sensor");
+					break;
+				}
 			}
 		}
 	}
@@ -85,14 +87,32 @@ public class SensorAgent extends Agent implements Sensor {
 	//Scheduler:
 	@Override
 	public boolean pickAndExecuteAnAction() {		
-		for (MyGlassSensor g: glassSheets) {
-			if (g.onSensor == onSensor.justEntered) { // If a piece of glass JUST ENTERED the sensor, then pass it to the conveyor, depending on the sensor
-				actPassGlassToConveyor(g); return true;
+		MyGlassSensor glass = null;
+		
+		synchronized(glassSheets) {
+			for (MyGlassSensor g: glassSheets) {
+				if (g.onSensor == onSensor.justEntered) { // If a piece of glass JUST ENTERED the sensor, then pass it to the conveyor, depending on the sensor
+					glass = g;
+					break;
+				}
 			}
-			if (g.onSensor == onSensor.no) { // If the glass just left the sensor, then remove it
-				actRemoveGlass(g); return true;
+		}
+		if (glass != null) {
+			actPassGlassToConveyor(glass); return true;
+		}
+		
+		synchronized(glassSheets) {		
+			for (MyGlassSensor g: glassSheets) {
+				if (g.onSensor == onSensor.no) { // If the glass just left the sensor, then remove it
+					glass = g;
+					break;
+				}
 			}
-		}		
+		}
+		if (glass != null) {
+			actRemoveGlass(glass); return true;
+		}
+		
 		return false;	
 	}
 
@@ -127,10 +147,10 @@ public class SensorAgent extends Agent implements Sensor {
 
 	private void actRemoveGlass(MyGlassSensor g) {
 		glassSheets.remove(g);
+		turnOnOffConveyor();
 		if (g.location == location.entry && cf.getPrevCF() != null) { // Tell the previous conveyor family that the sensor currently has nothing on it
 			cf.getPrevCF().msgPositionFree();
 			print("Glass with ID (" + g.glass.getId() + ") removed from sensor");
-			turnOnOffConveyor();
 		}
 	}
 
@@ -160,16 +180,19 @@ public class SensorAgent extends Agent implements Sensor {
 			// If any of the following conditions are met, turn off the conveyor, else, leave it on
 			if (cf.getPopUp().isPopUpDown() == false) {	
 				transducer.fireEvent(TChannel.ALL_GUI, TEvent.CONVEYOR_DO_STOP, null);
+				print("PopUp is up, turn conveyor off");
 				return;
 			} // Is the popUp still up?
 			
-			if (cf.getPopUp().getGlassToBeProcessed().size() > 0 && cf.getSensor("popUp").getGlassSheets().size() > 0) { 
+			if (cf.getPopUp().getGlassToBeProcessed().size() > 0 && cf.getSensor("popUp").getGlassSheets().size() > 0 && cf.getConveyor().getGlassSheets().size() > 0) { 
 				transducer.fireEvent(TChannel.ALL_GUI, TEvent.CONVEYOR_DO_STOP, null);
+				print("Glass is on the Pop up sensor and the popUp still has glass on it, turn conveyor off");
 				return; 
 			} // Is there still something on the popUp sensor and is there still glass beiong processed?
 
 			if (cf.getConveyor().getGlassSheets().size() == 0) {
 				transducer.fireEvent(TChannel.ALL_GUI, TEvent.CONVEYOR_DO_STOP, null);
+				print("No glass on conveyor, turn conveyor off");
 				return; 
 			} // The conveyor does not need to be on when there is no glass on it
 		}

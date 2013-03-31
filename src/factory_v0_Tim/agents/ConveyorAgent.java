@@ -52,23 +52,27 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	}
 	
 	public void msgGiveGlassToPopUp(Glass g) {
-		for (MyGlassConveyor glass: glassSheets) {
-			if (glass.glass.getId() == g.getId()) {
-				glass.conveyorState = conveyorState.passPopUp;
-				print("Glass with ID (" + glass.glass.getId() + ") soon going to PopUp");
-				stateChanged();
-				break;
+		synchronized(glassSheets) {
+			for (MyGlassConveyor glass: glassSheets) {
+				if (glass.glass.getId() == g.getId()) {
+					glass.conveyorState = conveyorState.passPopUp;
+					print("Glass with ID (" + glass.glass.getId() + ") soon going to PopUp");
+					stateChanged();
+					break;
+				}
 			}
 		}
 	}
 
 	public void msgPassOffGlass(Glass g) {
-		for (MyGlassConveyor glass: glassSheets) {
-			if (glass.glass.getId() == g.getId()) {
-				glass.conveyorState = conveyorState.passCF;
-				print("Glass with ID (" + glass.glass.getId() + ") soon going to next ConveyorFamily");
-				stateChanged();
-				break;
+		synchronized(glassSheets) {
+			for (MyGlassConveyor glass: glassSheets) {
+				if (glass.glass.getId() == g.getId()) {
+					glass.conveyorState = conveyorState.passCF;
+					print("Glass with ID (" + glass.glass.getId() + ") soon going to next ConveyorFamily");
+					stateChanged();
+					break;
+				}
 			}
 		}
 	}
@@ -86,28 +90,43 @@ public class ConveyorAgent extends Agent implements Conveyor {
 
 	//Scheduler:
 	public boolean pickAndExecuteAnAction() {
-		for (MyGlassConveyor g: glassSheets) {
-			if (g.conveyorState == conveyorState.passPopUp && cf.getPopUp().getGlassToBeProcessed().isEmpty() == true) {
-				if (
-					cf.getPopUp().getFreeChannels() > 0
-					||
-					!cf.getPopUp().doesGlassNeedProcessing(g.glass)
-					
-				) {						
-					// This rule will only work when:
-					// 1. the glassSheet is supposed to go to the PopUp, 
-					// 2. when there is nothing on the pop-up, and
-					// 3. when there is a available machine to process the glass OR the glass just needs to pass through WITHOUT processing, even if both machines are full
-					actPassGlassToPopUp(g); return true;
-				}	
+		MyGlassConveyor glass = null; // Use null variable for determining is value is found from synchronized loop
+		
+		synchronized(glassSheets) {
+			for (MyGlassConveyor g: glassSheets) {
+				if (g.conveyorState == conveyorState.passPopUp && cf.getPopUp().getGlassToBeProcessed().isEmpty() == true) {
+					if (
+						cf.getPopUp().getFreeChannels() > 0
+						||
+						!cf.getPopUp().doesGlassNeedProcessing(g.glass)
+						
+					) {						
+						// This rule will only work when:
+						// 1. the glassSheet is supposed to go to the PopUp, 
+						// 2. when there is nothing on the pop-up, and
+						// 3. when there is a available machine to process the glass OR the glass just needs to pass through WITHOUT processing, even if both machines are full
+						glass = g;
+						break;
+					}	
+				}					
 			}
-				
 		}
-		for (MyGlassConveyor g: glassSheets) {
-			if (g.conveyorState == conveyorState.passCF && positionFreeNextCF == true) {
-				actPassGlassToNextCF(g); return true;
+		if (glass != null) {
+			actPassGlassToPopUp(glass); return true;
+		}
+		
+		synchronized(glassSheets) {
+			for (MyGlassConveyor g: glassSheets) {
+				if (g.conveyorState == conveyorState.passCF && positionFreeNextCF == true) {
+					glass = g;
+					break;
+				}
 			}
+		}		
+		if (glass != null) {
+			actPassGlassToNextCF(glass); return true;
 		}
+		
 		return false;
 	}
 	

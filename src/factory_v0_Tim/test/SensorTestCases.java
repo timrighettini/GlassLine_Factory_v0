@@ -119,10 +119,10 @@ public class SensorTestCases {
 		sensors.add(exitSensor);
 		
 		// Make the Mock Conveyor
-		Conveyor mockConveyor = new MockConveyor("mockConveyor", transducer);
+		MockConveyor mockConveyor = new MockConveyor("mockConveyor", transducer);
 		
 		// Make the Mock PopUp
-		PopUp mockPopUp = new MockPopUp("mockPopUp", transducer);
+		MockPopUp mockPopUp = new MockPopUp("mockPopUp", transducer);
 		
 		// Make the Mock Animation for the Tests outlined in 4.
 		MockAnimation mockAnimation = new MockAnimation(transducer);
@@ -232,7 +232,10 @@ public class SensorTestCases {
 		// Check for the following postConditions:
 		assertTrue(realCF.getSensor("popUp").getGlassSheets().size() == 1); // PopUp sensor should still have glass
 		assertEquals(realCF.getSensor("popUp").getGlassSheets().get(0).onSensor, onSensor.yes); // Glass should now be in the yes state
-		assertTrue(realCF.getConveyor().getGlassSheets().size() == 1); // The Mockconveyor should have glass now
+		assertTrue(realCF.getConveyor().getGlassSheets().size() == 0); // The Mockconveyor should have sent it's glass to the popUp
+		
+		// Let's also assume that the conveyor got it's glass back from processing from the mock popUp, and that the glass was removed from the popUp		
+		mockPopUp.sendBackProcessedGlass(glass);
 		
 		// Now process the transducer event(s) and then check that the conveyor is still on!
 		while (transducer.processNextEvent());
@@ -242,7 +245,7 @@ public class SensorTestCases {
 		assertEquals(realCF.getSensor("popUp").getGlassSheets().get(0).onSensor, onSensor.yes); // Glass should now be in the yes state
 		assertTrue(realCF.getConveyor().getGlassSheets().size() == 1); // The Mockconveyor should have glass now
 		
-		assertTrue(realCF.getConveyor().isConveyorOn() == true); // GUI conveyor should have been turned on		
+		assertTrue(realCF.getConveyor().isConveyorOn() == false); // GUI conveyor should have been turned off, nothing is currently on it (the glass is in the popUp)		
 		
 		// Now the GuiGlass has just left this sensor, so the MockAnimation will notify this sensor of the news via the transducer
 		
@@ -261,9 +264,13 @@ public class SensorTestCases {
 		// Let's run the sensor scheduler
 		realCF.getSensor("popUp").runScheduler();
 		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
 		// Check for the following postconditions:
 		assertTrue(realCF.getSensor("popUp").getGlassSheets().size() == 0); // Entry sensor should not have the glass now
 		assertTrue(realCF.getConveyor().getGlassSheets().size() == 1); // Mock conveyor still has the glass
+		assertTrue(realCF.getPopUp().getGlassToBeProcessed().size() == 0); // Mock popUp has no glass
 		assertTrue(realCF.getConveyor().isConveyorOn() == true); // GUI conveyor should still be turned on	
 		
 		// At this point, it is assumed that the glass has moved along the conveyor until it reaches the exit sensor.  Thus, the following test will occur:

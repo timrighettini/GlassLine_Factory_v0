@@ -57,8 +57,10 @@ public class MockPopUp extends MockAgent implements PopUp {
 	}
 	
 	public void processGlass() { // Hack method to fake processing the glass
-		if (!glassToBeProcessed.isEmpty())
+		if (!glassToBeProcessed.isEmpty()) {
+			print("Glass with ID (" + glassToBeProcessed.get(0).glass.getId() + ") removed");
 			glassProcessing.add(glassToBeProcessed.remove(0));
+		}
 	}
 
 	//Other Methods:
@@ -93,12 +95,14 @@ public class MockPopUp extends MockAgent implements PopUp {
 		cf.getConveyor().msgUpdateGlass(glass);
 		for (MyGlassPopUp g: glassToBeProcessed) {
 			if (g.glass.getId() == glass.getId()) {
+				print("Glass with ID (" + g.glass.getId() + ") removed");
 				glassToBeProcessed.remove(g);
 				return;
 			}
 		}
 		for (MyGlassPopUp g: glassProcessing) {
 			if (g.glass.getId() == glass.getId()) {
+				print("Glass with ID (" + g.glass.getId() + ") removed");
 				glassProcessing.remove(g);
 				return;
 			}
