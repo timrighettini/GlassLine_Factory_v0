@@ -24,13 +24,13 @@ public class PopUpAgent extends Agent implements PopUp {
 
 	// Data:	
 	private class MachineCom { // Will hold a communication channel to a robot, allowing for the possibility to communicate to multiple robots at once
-		MachineAgent machine; // Robot reference
+		Machine machine; // Robot reference
 		boolean inUse; // Is this channel currently occupied by a piece of glass
 		MachineType processType; // What process does this robot do?  Does the glass need to undergo this process?
 		MyGlassPopUp glassBeingProcessed; // This reference needs to be held so PopUpAgents know which piece of glass is being processed by the robot.  This name will be abbreviated to glassBeingProcessed.
 		
 		public MachineCom(Machine machine) {
-			this.machine = (MachineAgent) machine;
+			this.machine = machine;
 			this.inUse = false; // At start, this channel is obviously not being used, so it has to be false
 			this.processType = machine.getProcessType();
 			this.glassBeingProcessed = null; // Currently, there is no glass being processed within this channel
@@ -113,7 +113,7 @@ public class PopUpAgent extends Agent implements PopUp {
 		if (g.glass.getRecipe().containsKey(com.processType) && g.glass.getRecipe().containsValue(true)) {
 			com.machine.msgProcessGlass(g.glass);
 			transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_UP, null); // Make sure to move the GUI popUp up
-			print("Glass with ID (" + g.glass.getId() + ") passed to Machine " + com.machine.getName() + "for processing");
+			print("Glass with ID (" + g.glass.getId() + ") passed to Machine " + com.processType + "for processing");
 			com.glassBeingProcessed = g;
 			com.inUse = true;
 			glassToBeProcessed.remove(g);	

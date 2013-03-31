@@ -54,8 +54,10 @@ public class MockConveyor extends MockAgent implements Conveyor {
 		for (MyGlassConveyor glass: glassSheets) {
 			if (glass.glass.getId() == g.getId()) {
 				glass.conveyorState = conveyorState.passPopUp;
-				print("Glass with ID (" + glass.glass.getId() + ") soon going to PopUp");
-				log.add(new LoggedEvent("Glass with ID (" + glass.glass.getId() + ") soon going to PopUp"));
+				print("Glass with ID (" + glass.glass.getId() + ") going to PopUp");
+				log.add(new LoggedEvent("Glass with ID (" + glass.glass.getId() + ") going to PopUp"));
+				cf.getPopUp().msgGiveGlassToPopUp(g); // Actually make the conveyor mock message the popUp with the appropriate glass
+				glassSheets.remove(glass);
 				break;
 			}
 		}
@@ -65,8 +67,8 @@ public class MockConveyor extends MockAgent implements Conveyor {
 		for (MyGlassConveyor glass: glassSheets) {
 			if (glass.glass.getId() == g.getId()) {
 				glass.conveyorState = conveyorState.passCF;
-				print("Glass with ID (" + glass.glass.getId() + ") soon going to next ConveyorFamily");
-				log.add(new LoggedEvent("Glass with ID (" + glass.glass.getId() + ") soon going to next ConveyorFamily"));				
+				print("Glass with ID (" + glass.glass.getId() + ") going to next ConveyorFamily");
+				log.add(new LoggedEvent("Glass with ID (" + glass.glass.getId() + ") going to next ConveyorFamily"));
 				glassSheets.remove(glass); // Hack: Just delete the glass to make it look like it moved to the next conveyor.				
 				break;
 			}

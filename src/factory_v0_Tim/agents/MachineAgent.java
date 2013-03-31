@@ -135,4 +135,9 @@ public class MachineAgent extends Agent implements Machine {
 			stateChanged();
 		}
 	}
+
+	@Override
+	public void setCF(ConveyorFamily cf) {
+		this.cf = cf;	
+	}
 }

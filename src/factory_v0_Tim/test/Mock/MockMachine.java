@@ -20,7 +20,6 @@ public class MockMachine extends MockAgent implements Machine {
 	
 	//Data:
 	private List<MyGlassMachine> glassToBeProcessed;
-	private RobotAgent robot; // Need a reference to the attached robot
 	private MachineType processType; // Designates what process this machine performs
 	
 	private ConveyorFamily cf; // Reference to the conveyor family.  This was not previously needed, because thr robot handled this, but now the robot agent is not being used, so the machine agent needs a reference to the conveyor family
@@ -32,10 +31,9 @@ public class MockMachine extends MockAgent implements Machine {
     boolean timerCalled = false; // Makes sure that the timer is not called too many times 
 	
 	//Constructors:
-	public MockMachine(String name, Transducer transducer, MachineType processType, int machineChannel, ConveyorFamily cf) { // Will exclude the robot unless it is needed
+	public MockMachine(String name, Transducer transducer, MachineType processType, int machineChannel) { // Will exclude the robot unless it is needed
 		// Initialize the variables based upon the constructor parameters first
 		super(name, transducer);
-		this.cf = cf;
 		this.processType = processType;
 		this.machineChannel = machineChannel;
 		
@@ -55,6 +53,7 @@ public class MockMachine extends MockAgent implements Machine {
 		glassToBeProcessed.add(new MyGlassMachine(g, processState.unprocessed));
 		transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_DOWN, null); // Make sure to move the GUI popUp down
 		print("Glass with ID (" + g.getId() + ") recieved");
+		log.add(new LoggedEvent("Glass with ID (" + g.getId() + ") recieved"));
 	}
 
 	// Transducer specific message
@@ -64,21 +63,24 @@ public class MockMachine extends MockAgent implements Machine {
 				glass.processState = processState.doneProcessing;
 				transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_UP, null); // Make sure to move the GUI popUp up
 				print("Glass with ID (" + g.getId() + ") done being processed");
+				log.add(new LoggedEvent("Glass with ID (" + g.getId() + ") done being processed"));
 				break;
 			}
 		}
 	}
 	
 	//Actions:
-	private void actProcessGlass(MyGlassMachine g) {
+	public void ProcessGlass(MyGlassMachine g) {
 		//transducer.sendProcessGlassMessage(); // Stub for when the transducer is set up to send a processing message to the animation
 		g.processState = processState.processing;
 		print("Glass with ID (" + g.glass.getId() + ") currently processing...");
+		log.add(new LoggedEvent("Glass with ID (" + g.glass.getId() + ") currently processing..."));
 	}
 
-	private void actPassGlassToCF(MyGlassMachine g) {
+	public void PassGlassToCF(MyGlassMachine g) {
 		g.glass.getRecipe().remove(this.processType); // Done with process, does not need to be in recipe anymore
 		print("Glass with ID (" + g.glass.getId() + ") passed to PopUp");
+		log.add(new LoggedEvent("Glass with ID (" + g.glass.getId() + ") passed to PopUp"));
 		//robot.msgDoneProcessingGlass(g.glass);
 		cf.msgGlassDone(g.glass, machineChannel);
 		glassToBeProcessed.remove(g);
@@ -96,5 +98,10 @@ public class MockMachine extends MockAgent implements Machine {
 	@Override
 	public MachineType getProcessType() {
 		return processType;
+	}
+
+	@Override
+	public void setCF(ConveyorFamily cf) {
+		this.cf = cf;		
 	}
 }
