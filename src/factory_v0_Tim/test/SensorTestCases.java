@@ -335,6 +335,12 @@ public class SensorTestCases {
 		// Check for the following postconditions:
 		assertTrue(realCF.getSensor("exit").getGlassSheets().size() == 0); // Entry sensor should not have the glass now
 		assertTrue(realCF.getConveyor().getGlassSheets().size() == 0); // Mock conveyor does not has the glass	
+		
+		/*
+		 * Since each sensor agent is only supoosed to hold ONE piece of glass at a time, it does not seem necessary to test with multiple pieces of glass since 
+		 * it does not test any cases specific to multiple glasses, but make makes things more redundant, in terms to just testing the sensor agents to see that they
+		 * work, versus testing how glass progresses through a conveyorFamily
+		 */
 	}
 	
 	@Test
@@ -488,5 +494,261 @@ public class SensorTestCases {
 		
 		/*Now if the exit sensor case were to run again, it would be just like in the first test, so repitition does not seem necessary here*/
 	}
+	
+	@Test
+	public void testTurnOnOffConveyor() {
+		/**
+		 * This test will complete the following objective: check to see that the conveyor stays on/off based upon the conditions given in the testTurnOnOffConveyor() function
+		 * How this test will work:
+		 * 1.  The entry sensor will introduce and remove a piece of glass to test each case
+		 * 2.  After each pice of glass is removed from the entrySensor, the value of the MockPopUp will be changed to test a new case, until all caess are tested.
+		 * Cases to be tested:
+		 * 1.  Conveyor turns from off to on
+		 * 		a. cf.getSensor("popUp").getGlassSheets().size() == 0 && cf.getPopUp().isPopUpDown() == true && cf.getPopUp().getGlassToBeProcessed().size() == 0
+		 * 2.  Conveyor Stays on while already on
+		 * 3.  Conveyor Turns off while on
+		 * 		a.  cf.getPopUp().isPopUpDown() == false
+		 * 		b.  cf.getPopUp().getGlassToBeProcessed().size() > 0 && cf.getSensor("popUp").getGlassSheets().size() > 0
+		 * 4.  Conveyor Stays off while off
+		 * 		a.  cf.getSensor("popUp").getGlassSheets().size() > 0
+		 * 			1)  cf.getPopUp().isPopUpDown() == false
+		 * 			2)  cf.getPopUp().getGlassToBeProcessed().size() > 0
+		 */
+		
+		// Now lets start the test
+		System.out.println("/****************Test: testTurnOnOffConveyor****************/");
+		
+		// Create a piece of glass to use for the test
+		Glass glass = new Glass(); // Since processing is not an issue with this test, let's just leave that field blank
 
+		
+		// Instantiate the transducer
+		Transducer transducer = new Transducer();
+		
+		// List of types for each sensor
+		List<String> typesA = new ArrayList<String>();
+		typesA.add("entry");
+		
+		// List of types for each sensor
+		List<String> typesB = new ArrayList<String>();
+		typesB.add("popUp");
+		
+		// List of types for each sensor
+		List<String> typesC = new ArrayList<String>();
+		typesC.add("exit");
+		
+		// Create the three sensor agents
+		Sensor entrySensor = new SensorAgent("entrySensor", transducer, typesA);
+		Sensor popUpSensor = new SensorAgent("popUpSensor", transducer, typesB);
+		Sensor exitSensor = new SensorAgent("exitSensor", transducer, typesC);
+		
+		// Add these sensors to a list and then put them within a conveyor family
+		List<Sensor> sensors = new ArrayList<Sensor>();
+		sensors.add(entrySensor);
+		sensors.add(popUpSensor);
+		sensors.add(exitSensor);
+		
+		// Make the Mock Conveyor
+		MockConveyor mockConveyor = new MockConveyor("mockConveyor", transducer);
+		
+		// Make the Mock PopUp
+		MockPopUp mockPopUp = new MockPopUp("mockPopUp", transducer);
+		
+		// Make the Mock Animation for the Tests outlined in 4.
+		MockAnimation mockAnimation = new MockAnimation(transducer);
+		
+		// Instantiate the conveyorFamilies and place everything inside them
+		MockConveyorFamily mockPrevCF = new MockConveyorFamily("mockPrevCF");
+		MockConveyorFamily mockNextCF = new MockConveyorFamily("mockNextCF");
+		ConveyorFamily realCF = new ConveyorFamilyImp("realCF", mockConveyor, sensors, mockPopUp);
+		
+		// Link up the conveyor families
+		realCF.setPrevCF(mockPrevCF);
+		realCF.setNextCF(mockNextCF);
+		mockNextCF.setPrevCF(realCF);
+		
+		// Change no values for the pop up, and let case 1.a. run
+		
+		// Check proconditions:  Conveyor should be off
+		assertTrue(realCF.getConveyor().isConveyorOn() == false);
+
+		/**********/
+		// Now run case 1
+		/**********/
+		
+		// *Note, since my first unit test proves the working functionality of the entry sensor message recpetion, scheduler, and action taking, it
+		// does not seem necessary to repeat the code here and clutter things up here when it is not necessary
+		
+		// Send the entry sensor a piece of glass
+		realCF.msgHereIsGlass(glass);
+		
+		// Let's run the sensor scheduler
+		realCF.getSensor("entry").runScheduler();
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// Now the conveyor should be on
+		assertTrue(realCF.getConveyor().isConveyorOn() == true);
+		// Lets make sure that the conditional expressions are correct
+		assertTrue(realCF.getSensor("popUp").getGlassSheets().size() == 0 && realCF.getPopUp().isPopUpDown() == true && realCF.getPopUp().getGlassToBeProcessed().size() == 0);
+		
+		// Remove the glass from the entry sensor, and test the next case
+		mockAnimation.fireEntrySensorExitGlass(glass);
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// Let's run the sensor scheduler to remove the glass
+		realCF.getSensor("entry").runScheduler();
+		
+		/**********/
+		// Now let's test case 2
+		/**********/
+		
+		// Send the entry sensor a piece of glass
+		realCF.msgHereIsGlass(glass);
+		
+		// Let's run the sensor scheduler
+		realCF.getSensor("entry").runScheduler();
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// The conveyor should STILL be on
+		assertTrue(realCF.getConveyor().isConveyorOn() == true);
+		
+		// Remove the glass from the entry sensor, and test the next case
+		mockAnimation.fireEntrySensorExitGlass(glass);
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// Let's run the sensor scheduler to remove the glass
+		realCF.getSensor("entry").runScheduler();
+		
+		/**********/
+		// Let's test case 3.a.
+		/**********/
+		mockPopUp.popUpDown = false; 
+		
+		// Send the entry sensor a piece of glass
+		realCF.msgHereIsGlass(glass);
+		
+		// Let's run the sensor scheduler
+		realCF.getSensor("entry").runScheduler();
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// The conveyor should now be off
+		assertTrue(realCF.getConveyor().isConveyorOn() == false);
+		// Test the equality conditions so that they match the case number
+		assertTrue(realCF.getPopUp().isPopUpDown() == false);
+		
+		// Remove the glass from the entry sensor, and test the next case
+		mockAnimation.fireEntrySensorExitGlass(glass);
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// Let's run the sensor scheduler to remove the glass
+		realCF.getSensor("entry").runScheduler();
+		
+		/**********/
+		// Let's test case 4.a.1
+		/**********/
+		mockPopUp.popUpDown = false; 
+		// Add glass into the popUp sensor
+		mockAnimation.firePopUpSensorEnterGlass(glass);
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// Send the entry sensor a piece of glass
+		realCF.msgHereIsGlass(glass);
+		
+		// Let's run the sensor scheduler
+		realCF.getSensor("entry").runScheduler();
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// The conveyor should now be off
+		assertTrue(realCF.getConveyor().isConveyorOn() == false);
+		// Test the equality conditions so that they match the case number
+		assertTrue(realCF.getSensor("popUp").getGlassSheets().size() > 0 && realCF.getPopUp().isPopUpDown() == false);
+		
+		// Remove the glass from the entry sensor, and test the next case
+		mockAnimation.fireEntrySensorExitGlass(glass);
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// Let's run the sensor scheduler to remove the glass
+		realCF.getSensor("entry").runScheduler();
+		
+		/**********/
+		// Let's test case 3.b.
+		/**********/
+		mockPopUp.popUpDown = true;
+		// Add glass into popUp
+		mockPopUp.msgGiveGlassToPopUp(glass);
+		
+		mockConveyor.conveyorOn = true; // Set the conveyorOn Variable to true
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// Send the entry sensor a piece of glass
+		realCF.msgHereIsGlass(glass);
+		
+		// Let's run the sensor scheduler
+		realCF.getSensor("entry").runScheduler();
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// The conveyor should now be off
+		assertTrue(realCF.getConveyor().isConveyorOn() == false);
+		// Test the equality conditions so that they match the case number
+		assertTrue(realCF.getPopUp().getGlassToBeProcessed().size() > 0 && realCF.getSensor("popUp").getGlassSheets().size() > 0);
+		
+		// Remove the glass from the entry sensor, and test the next case
+		mockAnimation.fireEntrySensorExitGlass(glass);
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// Let's run the sensor scheduler to remove the glass
+		realCF.getSensor("entry").runScheduler();
+		
+		/**********/
+		// Let's test case 4.a.2
+		/**********/
+		
+		// Send the entry sensor a piece of glass
+		realCF.msgHereIsGlass(glass);
+		
+		// Let's run the sensor scheduler
+		realCF.getSensor("entry").runScheduler();
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// The conveyor should still be off
+		assertTrue(realCF.getConveyor().isConveyorOn() == false);
+		// Test the equality conditions so that they match the case number
+		assertTrue(realCF.getSensor("popUp").getGlassSheets().size() > 0);
+		assertTrue(realCF.getPopUp().getGlassToBeProcessed().size() > 0);
+		
+		// Remove the glass from the entry sensor, and test the next case
+		mockAnimation.fireEntrySensorExitGlass(glass);
+		
+		// Now process the transducer event(s)
+		while (transducer.processNextEvent());
+		
+		// Let's run the sensor scheduler to remove the glass
+		realCF.getSensor("entry").runScheduler();
+	}
 }

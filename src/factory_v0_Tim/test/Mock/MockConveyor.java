@@ -19,7 +19,7 @@ public class MockConveyor extends MockAgent implements Conveyor {
 	//Data:
 	private List<MyGlassConveyor> glassSheets; // List to hold all of the glass sheets
 	private boolean positionFreeNextCF; // Will determine if a piece of glass should be passed to the next conveyor family.  This will initially be set to true.
-	private boolean conveyorOn;
+	public boolean conveyorOn;
 	private ConveyorFamily cf;
 	
 	// Constructors:

@@ -129,7 +129,7 @@ public class SensorAgent extends Agent implements Sensor {
 		glassSheets.remove(g);
 		if (g.location == location.entry && cf.getPrevCF() != null) { // Tell the previous conveyor family that the sensor currently has nothing on it
 			cf.getPrevCF().msgPositionFree();
-			print("Glass with ID (" + g.glass.getId() + ") removed from sensor " + name);
+			print("Glass with ID (" + g.glass.getId() + ") removed from sensor");
 			turnOnOffConveyor();
 		}
 	}
