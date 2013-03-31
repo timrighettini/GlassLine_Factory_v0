@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class PopUpTestCases {
 
-	// These cases will only test to make sure that the INNER functionality of this agent works.  These tests will not involve the entire coveyor family
+	// These cases will only test to make sure that the INNER functionality of this agent works.  These tests will not involve the entire conveyor family
 	
 	@Test
 	public void test() {

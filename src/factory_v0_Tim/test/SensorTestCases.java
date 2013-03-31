@@ -24,7 +24,7 @@ import factory_v0_Tim.test.Mock.MockPopUp;
 
 public class SensorTestCases {
 
-	// These cases will only test to make sure that the INNER functionality of this agent works.  These tests will not involve the entire coveyor family
+	// These cases will only test to make sure that the INNER functionality of this agent works.  These tests will not involve the entire conveyor family
 	
 	@Test
 	public void threeMainSensorAgentTests() {
