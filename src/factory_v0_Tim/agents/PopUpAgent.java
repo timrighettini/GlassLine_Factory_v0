@@ -110,7 +110,7 @@ public class PopUpAgent extends Agent implements PopUp {
 
 	//Actions:
 	private void actPassGlassToMachine(MyGlassPopUp g, MachineCom com) {
-		if (g.glass.getRecipe().containsKey(com.processType)) {
+		if (g.glass.getRecipe().containsKey(com.processType) && g.glass.getRecipe().containsValue(true)) {
 			com.machine.msgProcessGlass(g.glass);
 			transducer.fireEvent(TChannel.ALL_GUI, TEvent.POPUP_DO_MOVE_UP, null); // Make sure to move the GUI popUp up
 			print("Glass with ID (" + g.glass.getId() + ") passed to Machine " + com.machine.getName() + "for processing");
@@ -188,7 +188,7 @@ public class PopUpAgent extends Agent implements PopUp {
 
 	@Override
 	public boolean doesGlassNeedProcessing(Glass glass) {
-		if (glass.getRecipe().containsKey(machineComs.get(0).processType)) { // Both machines on every offline process do the same process
+		if (glass.getRecipe().containsKey(machineComs.get(0).processType) && glass.getRecipe().containsValue(true)) { // Both machines on every offline process do the same process
 			return true;
 		}
 		else {

@@ -22,6 +22,7 @@ public class MockPopUp extends MockAgent implements PopUp {
 
 
 	public List<MyGlassPopUp> glassToBeProcessed; // This name will be abbreviated as glassToBeProcessed in many functions to save on space and complexity
+	public List<MyGlassPopUp> glassProcessing; // Hack list to bring glass out of the above list when glass is "processing" so the conveyor agent will work 
 
 	// Positional variable for whether the Pop-Up in the GUI is up or down, and it will be changed through the transducer and checked within one of the scheduler rules
 	public boolean popUpDown; // Is this value is true, then the associated popUp is down (will be changed through the appropriate transducer eventFired(args[]) function.
@@ -37,6 +38,7 @@ public class MockPopUp extends MockAgent implements PopUp {
 		
 		// Then set the values that need to be initialized within this class, specifically
 		glassToBeProcessed = Collections.synchronizedList(new ArrayList<MyGlassPopUp>());
+		glassProcessing = Collections.synchronizedList(new ArrayList<MyGlassPopUp>());
 
 		popUpDown = true; // The popUp has to be down when the system starts...
 		initializeTransducerChannels();		
@@ -52,6 +54,11 @@ public class MockPopUp extends MockAgent implements PopUp {
 	public void msgGiveGlassToPopUp(Glass g) { // Get Glass from conveyor to PopUp
 		glassToBeProcessed.add(new MyGlassPopUp(g, processState.unprocessed));
 		print("Glass with ID (" + g.getId() + ") added");
+	}
+	
+	public void processGlass() { // Hack method to fake processing the glass
+		if (!glassToBeProcessed.isEmpty())
+			glassProcessing.add(glassToBeProcessed.remove(0));
 	}
 
 	//Other Methods:
@@ -87,6 +94,12 @@ public class MockPopUp extends MockAgent implements PopUp {
 		for (MyGlassPopUp g: glassToBeProcessed) {
 			if (g.glass.getId() == glass.getId()) {
 				glassToBeProcessed.remove(g);
+				return;
+			}
+		}
+		for (MyGlassPopUp g: glassProcessing) {
+			if (g.glass.getId() == glass.getId()) {
+				glassProcessing.remove(g);
 				return;
 			}
 		}
