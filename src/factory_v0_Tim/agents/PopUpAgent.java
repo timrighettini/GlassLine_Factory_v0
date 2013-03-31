@@ -96,9 +96,13 @@ public class PopUpAgent extends Agent implements PopUp {
 		for (MyGlassPopUp g: glassToBeProcessed) {
 			if (g.processState == processState.unprocessed) {
 				for (MachineCom com: machineComs) {
-					if (com.inUse == false && popUpDown == true) {
+					if ((com.inUse == false && popUpDown == true)) {
 						actPassGlassToMachine(g, com); return true;
 					}
+				}
+				if (g.glass.getRecipe().containsKey(machineComs.get(0).processType) && g.glass.getRecipe().containsValue(false)) {
+					// Since both machineComs point to the same machine type, this code will fine
+					actPassGlassToConveyor(g); return true;
 				}
 			}
 		}
