@@ -2,7 +2,25 @@ package factory_v0_Tim.test;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
+
+import shared.Glass;
+import shared.interfaces.ConveyorFamily;
+import transducer.Transducer;
+import factory_v0_Tim.agents.ConveyorAgent;
+import factory_v0_Tim.agents.SensorAgent;
+import factory_v0_Tim.interfaces.Conveyor;
+import factory_v0_Tim.interfaces.PopUp;
+import factory_v0_Tim.interfaces.Sensor;
+import factory_v0_Tim.misc.ConveyorFamilyImp;
+import factory_v0_Tim.misc.MyGlassConveyor.conveyorState;
+import factory_v0_Tim.test.Mock.MockAnimation;
+import factory_v0_Tim.test.Mock.MockConveyor;
+import factory_v0_Tim.test.Mock.MockConveyorFamily;
+import factory_v0_Tim.test.Mock.MockPopUp;
 
 public class ConveyorTestCases {
 
@@ -43,6 +61,137 @@ public class ConveyorTestCases {
 		 * 18.  Have nextCF message positionFree to the conveyor
 		 * 19.  Check Postconditions: No glass in conveyor, positionFreeCF should be true
 		 */
+		
+		// Set up the conveyor family
+		
+		System.out.println("/****************Test: testConveyorOneGlass****************/");
+		
+		// Create a piece of glass to use for the test
+		Glass glass = new Glass(); // Since processing is not an issue with this test, let's just leave that field blank
+		
+		// Instantiate the transducer
+		Transducer transducer = new Transducer();
+		
+		// List of types for each sensor
+		List<String> typesA = new ArrayList<String>();
+		typesA.add("entry");
+		
+		// List of types for each sensor
+		List<String> typesB = new ArrayList<String>();
+		typesB.add("popUp");
+		
+		// List of types for each sensor
+		List<String> typesC = new ArrayList<String>();
+		typesC.add("exit");
+		
+		// Create the three sensor agents
+		Sensor entrySensor = new SensorAgent("entrySensor", transducer, typesA);
+		Sensor popUpSensor = new SensorAgent("popUpSensor", transducer, typesB);
+		Sensor exitSensor = new SensorAgent("exitSensor", transducer, typesC);
+		
+		// Add these sensors to a list and then put them within a conveyor family
+		List<Sensor> sensors = new ArrayList<Sensor>();
+		sensors.add(entrySensor);
+		sensors.add(popUpSensor);
+		sensors.add(exitSensor);
+		
+		// Make the Conveyor
+		ConveyorAgent conveyor = new ConveyorAgent("Conveyor", transducer);
+		
+		// Make the Mock PopUp
+		MockPopUp mockPopUp = new MockPopUp("mockPopUp", transducer);
+		
+		// Make the Mock Animation for the Tests outlined in 4.
+		MockAnimation mockAnimation = new MockAnimation(transducer);
+		
+		// Instantiate the conveyorFamilies and place everything inside them
+		MockConveyorFamily mockPrevCF = new MockConveyorFamily("mockPrevCF");
+		MockConveyorFamily mockNextCF = new MockConveyorFamily("mockNextCF");
+		ConveyorFamily realCF = new ConveyorFamilyImp("realCF", conveyor, sensors, mockPopUp);
+		
+		// Link up the conveyor families
+		realCF.setPrevCF(mockPrevCF);
+		realCF.setNextCF(mockNextCF);
+		mockNextCF.setPrevCF(realCF);
+		
+		// Now that the conveyorFamily is set up, let's test out the conveyorAgent
+		assertTrue(conveyor.getGlassSheets().size() == 0); // No glass within conveyor
+		assertTrue(conveyor.getPositionFreeNextCF() == true); // PositionFreeCF should be true
+		
+		// Now let's give a piece of glass through the "entry sensor"
+		conveyor.msgGiveGlassToConveyor(glass);
+		
+		// Check post conditions
+		assertTrue(conveyor.getGlassSheets().size() == 1); // Glass within conveyor
+		assertTrue(conveyor.getGlassSheets().get(0).conveyorState == conveyorState.onConveyor); // Glass state within conveyor is onConveyor
+		assertTrue(conveyor.getPositionFreeNextCF() == true); // PositionFreeCF should be true
+		
+		// Run the scheduler
+		conveyor.pickAndExecuteAnAction();
+		
+		// Check postconditions
+		assertTrue(conveyor.getGlassSheets().size() == 1); // Glass within conveyor
+		assertTrue(conveyor.getGlassSheets().get(0).conveyorState == conveyorState.onConveyor); // Glass state within conveyor is onConveyor
+		assertTrue(conveyor.getPositionFreeNextCF() == true); // PositionFreeCF should be true
+		
+		// Pass in glass update from the "popUp sensor"
+		conveyor.msgGiveGlassToPopUp(glass);
+		
+		// Check postconditions
+		assertTrue(conveyor.getGlassSheets().size() == 1); // Glass within conveyor
+		assertTrue(conveyor.getGlassSheets().get(0).conveyorState == conveyorState.passPopUp); // Glass state within conveyor is onConveyor
+		assertTrue(conveyor.getPositionFreeNextCF() == true); // PositionFreeCF should be true
+		
+		// Run the scheduler
+		conveyor.pickAndExecuteAnAction();
+		
+		// Check postconditions
+		assertTrue(conveyor.getGlassSheets().size() == 0); // Glass not within conveyor
+		assertTrue(mockPopUp.getGlassToBeProcessed().size() == 1); // Glass should now be within MockPopUp
+		assertTrue(conveyor.getPositionFreeNextCF() == true); // PositionFreeCF should be true
+		
+		// Now, "return" the glass from processing
+		mockPopUp.sendBackProcessedGlass(glass);
+		
+		// Check postconditions
+		assertTrue(conveyor.getGlassSheets().size() == 1); // Glass within conveyor
+		assertTrue(conveyor.getGlassSheets().get(0).conveyorState == conveyorState.onConveyor); // Glass state within conveyor is onConveyor
+		assertTrue(mockPopUp.getGlassToBeProcessed().size() == 0); // Glass should not be within MockPopUp
+		assertTrue(conveyor.getPositionFreeNextCF() == true); // PositionFreeCF should be true
+		
+		// Run the scheduler
+		conveyor.pickAndExecuteAnAction();
+		
+		// Check postconditions
+		assertTrue(conveyor.getGlassSheets().size() == 1); // Glass within conveyor
+		assertTrue(conveyor.getGlassSheets().get(0).conveyorState == conveyorState.onConveyor); // Glass state within conveyor is onConveyor
+		assertTrue(mockPopUp.getGlassToBeProcessed().size() == 0); // Glass should not be within MockPopUp
+		assertTrue(conveyor.getPositionFreeNextCF() == true); // PositionFreeCF should be true
+		
+		// Pass in glass from the "exit sensor"
+		conveyor.msgPassOffGlass(glass);
+		
+		// Check postconditions
+		assertTrue(conveyor.getGlassSheets().size() == 1); // Glass within conveyor
+		assertTrue(conveyor.getGlassSheets().get(0).conveyorState == conveyorState.passCF); // Glass state within conveyor is passCF
+		assertTrue(conveyor.getPositionFreeNextCF() == true); // PositionFreeCF should be true	
+		
+		// Run the scheduler
+		conveyor.pickAndExecuteAnAction();
+		
+		// Check postconditions
+		assertTrue(conveyor.getGlassSheets().size() == 0); // Glass not within conveyor		
+		assertTrue(conveyor.getPositionFreeNextCF() == false); // PositionFreeCF should be false
+		assertTrue(mockNextCF.glassSheets.size() == 1); // Glass should now be located within the conveyor family ahead
+		
+		// After "some time" has passed, the nextCF messages the conveyor that another piece of glass can be sent through
+		mockNextCF.sendPositionFree();
+		
+		// Check postconditions
+		assertTrue(conveyor.getGlassSheets().size() == 0); // Glass not within conveyor		
+		assertTrue(conveyor.getPositionFreeNextCF() == true); // PositionFreeCF should be false
+		assertTrue(mockNextCF.glassSheets.size() == 1); // Glass should now be located within the conveyor family ahead
+		
+		// At this point, the conveyor would be able to process a piece of glass again in a similar fashion
 	}
-
 }

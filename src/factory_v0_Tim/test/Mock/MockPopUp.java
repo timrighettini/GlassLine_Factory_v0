@@ -33,6 +33,8 @@ public class MockPopUp extends MockAgent implements PopUp {
 		// Set the passed in values first
 		super(name, transducer);
 		
+		this.name = name;
+		
 		// Then set the values that need to be initialized within this class, specifically
 		glassToBeProcessed = Collections.synchronizedList(new ArrayList<MyGlassPopUp>());
 
@@ -78,6 +80,17 @@ public class MockPopUp extends MockAgent implements PopUp {
 	public boolean isPopUpDown() {
 		return popUpDown;
 	}
+	
+	// Hack method for the mock PopUp
+	public void sendBackProcessedGlass(Glass glass) { // Will "return" the glass from processing
+		cf.getConveyor().msgUpdateGlass(glass);
+		for (MyGlassPopUp g: glassToBeProcessed) {
+			if (g.glass.getId() == glass.getId()) {
+				glassToBeProcessed.remove(g);
+				return;
+			}
+		}
+	}
 
 	@Override
 	public void msgDoneProcessingGlass(Glass glass) {
@@ -88,7 +101,7 @@ public class MockPopUp extends MockAgent implements PopUp {
 	@Override
 	public int getFreeChannels() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 1;
 	}
 
 	@Override

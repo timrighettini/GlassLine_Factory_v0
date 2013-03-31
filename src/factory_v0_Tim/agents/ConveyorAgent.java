@@ -155,4 +155,7 @@ public class ConveyorAgent extends Agent implements Conveyor {
 	public void runScheduler() {
 		pickAndExecuteAnAction();
 	}
+	public boolean getPositionFreeNextCF() {
+		return positionFreeNextCF;
+	}
 }

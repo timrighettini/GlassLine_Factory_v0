@@ -1,5 +1,6 @@
 package factory_v0_Tim.test.Mock;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import factory_v0_Tim.interfaces.Conveyor;
@@ -11,7 +12,7 @@ import shared.interfaces.ConveyorFamily;
 
 public class MockConveyorFamily implements ConveyorFamily {
 	//Data:
-	public List<Glass> glassSheets; // Will hold the glass to be received from the previous ConveyorFamily
+	public List<Glass> glassSheets = new ArrayList<Glass>(); // Will hold the glass to be received from the previous ConveyorFamily
 	public String name;
 	public ConveyorFamily prevCF;
 	public ConveyorFamily nextCF;
@@ -61,6 +62,10 @@ public class MockConveyorFamily implements ConveyorFamily {
 
 	public String getName() {
 		return name;
+	}
+	
+	public void sendPositionFree() { // Hack method for unit testing
+		prevCF.msgPositionFree(); // Allow the prevCF to send another piece of glass over
 	}
 
 	@Override
